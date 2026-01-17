@@ -39,3 +39,4 @@ out/
 /src/main/resources/application.properties
 /src/main/resources/application-dev.properties
 /src/test/java/com/project/groupware/GroupwareApplicationTests.java
+/src/main/java/com/project/groupware/test/
