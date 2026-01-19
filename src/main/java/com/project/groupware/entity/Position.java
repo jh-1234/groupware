@@ -4,15 +4,13 @@ import com.project.groupware.converters.BooleanConverter;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "TBL_POSITION")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
 public class Position {
 
     @Id
@@ -32,12 +30,4 @@ public class Position {
     @Convert(converter = BooleanConverter.class)
     @Column(name = "DEL_YN")
     private Boolean isDeleted;
-
-    @Builder
-    public Position(String posName, Long posAuthValue, Integer sortOrder) {
-        this.posName = posName;
-        this.posAuthValue = posAuthValue;
-        this.sortOrder = sortOrder;
-        this.isDeleted = false;
-    }
 }

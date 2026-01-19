@@ -5,7 +5,7 @@ import GuestOnlyLayout from "./components/layout/GuestOnlyLayout";
 import LoginLayout from "./components/layout/LoginLayout";
 import AuthLayout from "./components/layout/AuthLayout";
 import MainLayout from "./components/layout/MainLayout";
-import Community from "./pages/Community";
+import Community from "./pages/community/Community";
 
 export default function RootRoute() {
   return (

@@ -1,16 +1,13 @@
 package com.project.groupware.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
 @Getter
-@Builder(toBuilder = true)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class EmployeeDTO {
 
@@ -42,7 +39,7 @@ public class EmployeeDTO {
 
     private LocalDate birthday;
 
-    private String profileLoadPath;
+    private String profileUrl;
 
     private LocalDate hireDate;
 

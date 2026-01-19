@@ -1,6 +1,6 @@
 package com.project.groupware.valid;
 
-import com.project.groupware.enums.ValidationType;
+import com.project.groupware.constants.ValidationType;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 

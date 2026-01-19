@@ -3,25 +3,22 @@ package com.project.groupware.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.project.groupware.utils.CommonUtils;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class LoginDTO {
 
+    @Setter(AccessLevel.NONE)
     private String username;
 
     private String password;
 
     private Boolean isRememberMe;
 
-    @Builder(toBuilder = true)
-    public LoginDTO(String username, String password, Boolean isRememberMe) {
+    public void setUsername(String username) {
         this.username = CommonUtils.strip(username);
-        this.password = password;
-        this.isRememberMe = isRememberMe;
     }
 }

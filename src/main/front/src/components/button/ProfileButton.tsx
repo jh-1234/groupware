@@ -15,17 +15,14 @@ export default function ProfileButton() {
 
   return (
     <Popover>
-      {/* 1. PopoverTrigger 안에 이름과 아이콘을 모두 넣습니다. */}
       <PopoverTrigger asChild>
         <div className="group flex cursor-pointer items-center gap-3 transition-opacity hover:opacity-80 active:scale-95">
-          {/* 이름 영역 */}
           <div className="flex flex-col text-right">
             <span className="text-sm font-semibold text-zinc-700">
               {session?.name}님
             </span>
           </div>
 
-          {/* 프로필 이미지/아이콘 영역 */}
           <div className="relative flex h-11 w-11 items-center justify-center rounded-full border border-zinc-200 bg-zinc-200 p-0.5 shadow-sm transition-all group-hover:border-zinc-300 group-hover:ring-4 group-hover:ring-zinc-100">
             {session?.profileUrl ? (
               <img

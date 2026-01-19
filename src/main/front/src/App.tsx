@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import "./App.css";
 import { useReissue } from "./hooks/useAuth";
 import RootRoute from "./RootRoute";
+import ModalProvider from "./provider/ModalProvider";
+import { Toaster } from "sonner";
 
 function App() {
   const { mutate: refreshLogin, isPending } = useReissue();
@@ -16,7 +18,14 @@ function App() {
 
   if (isPending) return <div className="loading"></div>;
 
-  return <RootRoute />;
+  return (
+    <>
+      <ModalProvider>
+        <RootRoute />
+      </ModalProvider>
+      <Toaster position="top-center" richColors />
+    </>
+  );
 }
 
 export default App;

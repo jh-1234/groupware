@@ -6,18 +6,28 @@ import com.project.groupware.utils.CommonUtils;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "TBL_EMPLOYEE")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
 public class Employee extends BaseEntity {
+
+    @PrePersist
+    public void prePersist() {
+        this.telClean = CommonUtils.telClean(this.tel);
+        this.isLocked = false;
+        this.isDeleted = false;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.telClean = CommonUtils.telClean(this.tel);
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -77,33 +87,4 @@ public class Employee extends BaseEntity {
     @Convert(converter = BooleanConverter.class)
     @Column(name = "DEL_YN")
     private Boolean isDeleted;
-
-    @Builder
-    public Employee(String username, String password, String empName, Department department, Position position, Role role, State state, String email, String tel, LocalDate birthday, File profile, LocalDate hireDate, LocalDate resignDate) {
-        this.username = username;
-        this.password = password;
-        this.empName = empName;
-        this.department = department;
-        this.position = position;
-        this.role = role;
-        this.state = state;
-        this.email = email;
-        this.tel = tel;
-        this.birthday = birthday;
-        this.profile = profile;
-        this.hireDate = hireDate;
-        this.resignDate = resignDate;
-        this.isLocked = false;
-        this.isDeleted = false;
-    }
-
-    @PrePersist
-    @PreUpdate
-    public void init() {
-        this.telClean = CommonUtils.telClean(this.tel);
-    }
-
-    public void delete() {
-        this.isDeleted = true;
-    }
 }

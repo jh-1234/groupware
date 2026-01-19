@@ -54,10 +54,7 @@ public class AuthService {
 
         redisTemplate.opsForValue().set("SESSION:" + session.empId(), sessionJson, Duration.ofDays(7));
 
-        return JwtTokenDTO.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
+        return new JwtTokenDTO(accessToken, refreshToken);
     }
 
     public String reissue(String refreshToken) {

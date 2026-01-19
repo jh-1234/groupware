@@ -1,4 +1,4 @@
-package com.project.groupware.enums;
+package com.project.groupware.constants;
 
 public enum ValidationType {
     NONE,

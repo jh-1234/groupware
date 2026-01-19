@@ -4,16 +4,19 @@ import com.project.groupware.converters.BooleanConverter;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "TBL_STATE")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
 public class State {
+
+    @PrePersist
+    public void prePersist() {
+        this.isDeleted = false;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,12 +35,4 @@ public class State {
     @Convert(converter = BooleanConverter.class)
     @Column(name = "DEL_YN")
     private Boolean isDeleted;
-
-    @Builder
-    public State(String stateKey, String stateName, Integer sortOrder) {
-        this.stateKey = stateKey;
-        this.stateName = stateName;
-        this.sortOrder = sortOrder;
-        this.isDeleted = false;
-    }
 }

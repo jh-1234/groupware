@@ -1,19 +1,27 @@
 package com.project.groupware.entity;
 
+import com.project.groupware.constants.FileConstants;
 import com.project.groupware.converters.BooleanConverter;
 import com.project.groupware.converters.FileModuleTypeConverter;
 import com.project.groupware.entity.auditing.BaseEntity;
-import com.project.groupware.enums.FileModuleType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "TBL_FILE")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
 public class File extends BaseEntity {
+
+    @PrePersist
+    public void prePersist() {
+        this.isDeleted = false;
+        this.isFileDeleted = false;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,7 +51,7 @@ public class File extends BaseEntity {
 
     @NotNull
     @Convert(converter = FileModuleTypeConverter.class)
-    private FileModuleType moduleType;
+    private FileConstants.Module moduleType;
 
     @NotNull
     private Long moduleId;
@@ -57,21 +65,4 @@ public class File extends BaseEntity {
     @Convert(converter = BooleanConverter.class)
     @Column(name = "FILE_DEL_YN")
     private Boolean isFileDeleted;
-
-    @Builder
-    public File(String originalName, String uploadName, String basename, String fileExt, Long fileSize, String filePath, String fileLoadPath, FileModuleType moduleType, Long moduleId, Boolean isDeleted, Boolean isFileDeleted) {
-        this.originalName = originalName;
-        this.uploadName = uploadName;
-        this.basename = basename;
-        this.fileExt = fileExt;
-        this.fileSize = fileSize;
-        this.filePath = filePath;
-        this.fileLoadPath = fileLoadPath;
-        this.moduleType = moduleType;
-        this.moduleId = moduleId;
-        this.isDeleted = isDeleted;
-        this.isFileDeleted = isFileDeleted;
-        this.isDeleted = false;
-        this.isFileDeleted = false;
-    }
 }
