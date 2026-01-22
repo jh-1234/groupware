@@ -1,6 +1,6 @@
 import { useAuthImages } from "@/hooks/useAuthImages";
-import { usePost, usePostDelete, useUpdateViewCount } from "@/hooks/usePost";
-import { useEffect, useState } from "react";
+import { usePost, usePostDelete } from "@/hooks/usePost";
+import { useState } from "react";
 import ImageSlider from "../common/ImageSlider";
 import CommentList from "@/pages/community/CommentList";
 import CommentInput from "@/pages/community/CommentInput";
@@ -9,7 +9,8 @@ import { Pencil, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { useOpenConfirmModal } from "@/store/confirmModal";
 import PostWriteModal from "./PostWriteModal";
-import PostLikeButton from "../common/PostLikeButton";
+import PostLikeButton from "../community/PostLikeButton";
+import { useSession } from "@/store/authStore";
 
 export default function PostDetailModal({
   isOpen,
@@ -31,9 +32,10 @@ export default function PostDetailModal({
   const filePaths = post?.files?.map((f) => f.fileLoadPath) || [];
   const { blobUrls } = useAuthImages(filePaths);
 
-  const { mutate: updateViewCount } = useUpdateViewCount();
-
   const openConfirmModal = useOpenConfirmModal();
+
+  const session = useSession();
+  const isMine = post?.authorId === session?.empId;
 
   const handlePostDelete = () => {
     openConfirmModal({
@@ -65,12 +67,6 @@ export default function PostDetailModal({
       },
     });
   };
-
-  useEffect(() => {
-    if (isOpen && postId) {
-      updateViewCount(postId);
-    }
-  }, [isOpen, postId]);
 
   if (!isOpen || !postId) return null;
 
@@ -110,20 +106,22 @@ export default function PostDetailModal({
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setIsEditModalOpen(true)}
-                className="rounded-full p-2 text-zinc-300 transition-colors hover:bg-zinc-100 hover:text-blue-600"
-              >
-                <Pencil className="h-5 w-5" />
-              </button>
-              <button
-                className="rounded-full p-2 text-zinc-300 transition-colors hover:bg-zinc-100 hover:text-red-500"
-                onClick={handlePostDelete}
-              >
-                <Trash2 className="h-5 w-5" />
-              </button>
-            </div>
+            {isMine && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsEditModalOpen(true)}
+                  className="rounded-full p-2 text-zinc-300 transition-colors hover:bg-zinc-100 hover:text-blue-600"
+                >
+                  <Pencil className="h-5 w-5" />
+                </button>
+                <button
+                  className="rounded-full p-2 text-zinc-300 transition-colors hover:bg-zinc-100 hover:text-red-500"
+                  onClick={handlePostDelete}
+                >
+                  <Trash2 className="h-5 w-5" />
+                </button>
+              </div>
+            )}
           </section>
 
           <article className="mt-8">

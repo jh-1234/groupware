@@ -88,13 +88,6 @@ public class PostController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping("/api/post/{postId}/comments")
-    public ResponseEntity<List<PostCommentDTO>> getComments(@PathVariable("postId") Long postId) {
-        List<PostCommentDTO> comments = postService.getComments(postId);
-
-        return ResponseEntity.ok(comments);
-    }
-
     @PostMapping("/api/post/comment")
     public ResponseEntity<Long> commentSave(@RequestPart("data") PostCommentDTO dto, @RequestPart(name = "images", required = false) List<MultipartFile> images) {
         Long commentId = postService.commentSave(dto, images);
@@ -112,6 +105,17 @@ public class PostController {
     @DeleteMapping("/api/post/comment/{commentId}")
     public ResponseEntity<HttpStatus> commentDelete(@PathVariable("commentId") Long commentId) {
         postService.commentDelete(commentId);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/api/post/comment-like-count-update")
+    public ResponseEntity<HttpStatus> commentLikeCountUpdate(@RequestBody @Validated(Like.class) PostDTO dto) {
+        if (Objects.isNull(dto.getPostId()) && Objects.isNull(dto.getCommentId())) {
+            throw new CustomException("postId or commentId is null");
+        }
+
+        postService.commentLikeCountUpdate(dto);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

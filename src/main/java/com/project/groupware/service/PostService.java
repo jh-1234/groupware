@@ -61,7 +61,11 @@ public class PostService {
         List<FileDTO> postFiles = fileService.getFiles(FileConstants.Module.POST, postId);
         post.setFiles(postFiles);
 
-        List<PostCommentDTO> comments = postMapper.getComments(postId);
+        PostCommentDTO param = new PostCommentDTO();
+        param.setPostId(postId);
+        param.setEmpId(Session.getSession().empId());
+
+        List<PostCommentDTO> comments = postMapper.getComments(param);
         Set<Long> commentIds = comments.stream().map(PostCommentDTO::getCommentId).collect(Collectors.toSet());
         Map<Long, List<FileDTO>> commentFiles = fileService.getAllFiles(FileConstants.Module.POST_COMMENT, commentIds);
         comments.forEach(comment -> comment.setFiles(commentFiles.get(comment.getCommentId())));
@@ -186,11 +190,24 @@ public class PostService {
         comment.setIsDeleted(true);
     }
 
-    public List<PostCommentDTO> getComments(Long postId) {
-        return null;
-    }
-
     public Optional<PostComment> findByCommentId(Long commentId) {
         return postCommentRepository.findByCommentIdAndIsDeletedFalse(commentId);
+    }
+
+    public void commentLikeCountUpdate(PostDTO dto) {
+        PostComment comment = findByCommentId(dto.getCommentId()).orElseThrow();
+
+        if (dto.getIsLiked()) {
+            PostLikeEmployeeMapping mapping = postLikeEmployeeMappingRepository.findByComment_CommentIdAndEmployee_EmpId(dto.getCommentId(), Session.getSession().empId()).orElseThrow();
+            postLikeEmployeeMappingRepository.delete(mapping);
+            postCommentRepository.decrementLikeCount(comment.getCommentId());
+        } else {
+            PostLikeEmployeeMapping mapping = new PostLikeEmployeeMapping();
+            mapping.setComment(comment);
+            mapping.setEmployee(employeeService.getActiveEmployee(Session.getSession().empId()).orElseThrow());
+
+            postLikeEmployeeMappingRepository.save(mapping);
+            postCommentRepository.incrementLikeCount(comment.getCommentId());
+        }
     }
 }

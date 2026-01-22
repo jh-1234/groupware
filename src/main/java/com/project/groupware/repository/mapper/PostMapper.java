@@ -8,5 +8,5 @@ import java.util.List;
 @Mapper
 public interface PostMapper {
 
-    List<PostCommentDTO> getComments(Long postId);
+    List<PostCommentDTO> getComments(PostCommentDTO dto);
 }

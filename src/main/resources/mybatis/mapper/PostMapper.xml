@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.project.groupware.repository.mapper.PostMapper">
-    <select id="getComments" resultType="com.project.groupware.dto.PostCommentDTO">
+    <select id="getComments" parameterType="com.project.groupware.dto.PostCommentDTO" resultType="com.project.groupware.dto.PostCommentDTO">
         WITH RECURSIVE COMMENT_TREE AS (
             SELECT
                 COMMENT_ID,
@@ -50,7 +50,8 @@
             ct.CONTENT AS content,
             ct.LIKE_COUNT AS likeCount,
             DATE_FORMAT(ct.CREATED_DATE, "%y-%m-%d %H:%i:%s") AS createdDateFormat,
-            ct.ROOT_ID AS rootId
+            ct.ROOT_ID AS rootId,
+            plem.LIKE_ID IS NOT NULL AS isLiked
         FROM
             COMMENT_TREE ct
         JOIN
@@ -65,6 +66,10 @@
         LEFT JOIN
             TBL_FILE f
                 ON f.FILE_ID = e.PROFILE_ID
+        LEFT JOIN
+            TBL_POST_LIKE_EMPLOYEE_MAPPING plem
+                ON plem.COMMENT_ID = ct.COMMENT_ID
+                AND plem.EMP_ID = #{empId}
         ORDER BY
             ct.ROOT_ID,
             ct.COMMENT_ID

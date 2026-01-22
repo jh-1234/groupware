@@ -42,6 +42,8 @@ public class PostCommentDTO {
 
     private Integer likeCount;
 
+    private Boolean isLiked;
+
     private String profileUrl;
 
     @Setter(AccessLevel.NONE)

@@ -1,6 +1,6 @@
 import CustomPagination from "@/components/common/Pagination";
 import PostDetailModal from "@/components/modal/PostDetailModal";
-import { usePosts } from "@/hooks/usePost";
+import { usePosts, useUpdateViewCount } from "@/hooks/usePost";
 import { MessageSquare, Eye, ThumbsUp } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -9,16 +9,22 @@ export default function PostList({ cateId }: { cateId: number }) {
   const { data } = usePosts(cateId, page);
   const posts = data?.content;
 
-  const [selectedPost, setSelectedPost] = useState<any>(null);
+  const [selectedPost, setSelectedPost] = useState<number | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+  const { mutate: updateViewCount } = useUpdateViewCount();
 
   useEffect(() => {
     setPage(0);
   }, [cateId]);
 
   const handlePostClick = (postId: number) => {
-    setSelectedPost(postId);
-    setIsDetailModalOpen(true);
+    updateViewCount(postId, {
+      onSuccess: () => {
+        setSelectedPost(postId);
+        setIsDetailModalOpen(true);
+      },
+    });
   };
   return (
     <>
@@ -83,7 +89,7 @@ export default function PostList({ cateId }: { cateId: number }) {
       <PostDetailModal
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
-        postId={selectedPost}
+        postId={selectedPost!}
       />
     </>
   );

@@ -34,6 +34,7 @@ export type PostComment = {
   content: string;
   likeCount?: number;
   isUpdated?: boolean;
+  isLiked?: boolean;
   createdDateFormat?: string;
   targetEmpId?: number;
   targetEmpName?: string;

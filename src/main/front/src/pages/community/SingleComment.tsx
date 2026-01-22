@@ -4,6 +4,7 @@ import { useAuthImages } from "@/hooks/useAuthImages";
 import ReplyInput from "./ReplyInput";
 import type { PostComment } from "@/types/post";
 import { useEffect, useRef } from "react";
+import CommentLikeButton from "@/components/community/CommentLikeButton";
 
 export default function SingleComment({
   comment,
@@ -71,9 +72,11 @@ export default function SingleComment({
         )}
 
         <div className="mt-3 flex gap-4 text-[11px] font-bold text-zinc-400">
-          <button className="hover:text-rose-500">
-            좋아요 {comment.likeCount || ""}
-          </button>
+          <CommentLikeButton
+            commentId={comment.commentId!}
+            isLiked={comment.isLiked!}
+            likeCount={comment.likeCount!}
+          />
           <button
             onClick={() =>
               setActiveReplyId(isSelected ? null : comment.commentId!)

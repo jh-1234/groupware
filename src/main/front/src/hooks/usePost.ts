@@ -5,6 +5,7 @@ import {
   postCommentSave,
   postDelete,
   postSave,
+  toggleCommentLike,
   togglePostLike,
   updateViewCount,
 } from "@/api/post";
@@ -117,42 +118,11 @@ export const useUpdateViewCount = () => {
 
   return useMutation({
     mutationFn: updateViewCount,
-    onMutate: async (postId) => {
-      // 진행 중인 쿼리 취소
-      await queryClient.cancelQueries({
-        queryKey: QUERY_KEYS.post.detail(postId),
-      });
-
-      // 이전 값 백업
-      const previousPost = queryClient.getQueryData(
-        QUERY_KEYS.post.detail(postId),
-      );
-
-      // 캐시를 즉시 업데이트
-      queryClient.setQueryData(QUERY_KEYS.post.detail(postId), (old: any) => {
-        if (!old) return old;
-        return {
-          ...old,
-          viewCount: (old.viewCount || 0) + 1,
-        };
-      });
-
-      return { previousPost };
-    },
-    // 에러 발생 시 원래 숫자로 롤백
-    onError: (_, postId, context) => {
-      if (context?.previousPost) {
-        queryClient.setQueryData(
-          QUERY_KEYS.post.detail(postId),
-          context.previousPost,
-        );
-      }
-    },
-    // 마지막에 서버와 동기화
-    onSettled: (_, __, postId) => {
+    onSuccess: (_, postId) => {
       queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.post.detail(postId),
       });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.post.list });
     },
   });
 };
@@ -162,6 +132,17 @@ export const usePostCommentSave = () => {
 
   return useMutation({
     mutationFn: postCommentSave,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.post.all });
+    },
+  });
+};
+
+export const useToggleCommentLike = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: toggleCommentLike,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.post.all });
     },

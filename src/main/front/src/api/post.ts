@@ -105,3 +105,18 @@ export const postCommentSave = async ({
     return await api.post("/api/post/comment", formData);
   }
 };
+
+export const toggleCommentLike = async ({
+  commentId,
+  isLiked,
+}: {
+  commentId: number;
+  isLiked: boolean;
+}) => {
+  const res = await api.post("/api/post/comment-like-count-update", {
+    commentId,
+    isLiked,
+  });
+
+  return res;
+};

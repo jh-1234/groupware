@@ -3,6 +3,7 @@ package com.project.groupware.repository.impl;
 import com.project.groupware.constants.PostConstants;
 import com.project.groupware.dto.PostDTO;
 import com.project.groupware.repository.custom.PostRepositoryCustom;
+import com.project.groupware.utils.Session;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
@@ -57,7 +58,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .join(employee.department, department)
                 .join(employee.position, position)
                 .leftJoin(employee.profile, file)
-                .leftJoin(postLikeEmployeeMapping).on(postLikeEmployeeMapping.post.eq(post))
+                .leftJoin(postLikeEmployeeMapping).on(postLikeEmployeeMapping.post.eq(post), postLikeEmployeeMapping.employee.empId.eq(Session.getSession().empId()))
                 .where(
                         post.postId.eq(postId),
                         post.isDeleted.eq(false)
