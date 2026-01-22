@@ -2,14 +2,14 @@ import type { ImagePreview } from "@/components/common/ImageUploader";
 import ImageUploader from "@/components/common/ImageUploader";
 import { usePostCommentSave } from "@/hooks/usePost";
 import { MessageSquare, Image as ImageIcon } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 interface ReplyInputProps {
   parentId: number;
   targetName: string;
   onCancel: () => void;
-  onSuccess: () => void;
+  onSuccess: (newId: number) => void;
 }
 
 export default function ReplyInput({
@@ -55,15 +55,24 @@ export default function ReplyInput({
     commentSave(
       { param, images: newFiles },
       {
-        onSuccess: () => {
+        onSuccess: (res) => {
           toast.success("답글이 등록되었습니다.");
           setContent("");
           setImages([]);
-          onSuccess();
+          onSuccess(res.data);
         },
       },
     );
   };
+
+  useEffect(() => {
+    return () => {
+      images.forEach((img) => {
+        if (img.previewUrl) URL.revokeObjectURL(img.previewUrl);
+      });
+    };
+  }, []);
+
   return (
     <div className="animate-in fade-in slide-in-from-top-2 mt-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 shadow-inner">
       <div className="mb-2 flex items-center gap-1.5 text-[11px] font-bold text-blue-600">
@@ -73,7 +82,7 @@ export default function ReplyInput({
 
       <textarea
         className="h-20 w-full resize-none bg-transparent text-sm outline-none placeholder:text-zinc-400"
-        placeholder="사진과 함께 답변을 남겨주세요..."
+        placeholder="사진과 함께 답변을 남겨주세요."
         autoFocus
         value={content}
         onChange={(e) => setContent(e.target.value)}

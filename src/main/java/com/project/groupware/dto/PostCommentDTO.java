@@ -18,10 +18,12 @@ import java.util.Set;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PostCommentDTO {
 
-    @NotNull(groups = Update.class)
+    @NotNull(groups = {Update.class})
     private Long commentId;
 
     private Long parentId;
+
+    private Long rootId;
 
     @NotNull(groups = Save.class)
     private Long postId;
@@ -29,6 +31,10 @@ public class PostCommentDTO {
     private Long empId;
 
     private String empName;
+
+    private Long targetEmpId;
+
+    private String targetEmpName;
 
     private String posName;
 
@@ -42,9 +48,13 @@ public class PostCommentDTO {
     @CustomValidation(name = "내용", max = 600, nullable = false, groups = {Save.class, Update.class})
     private String content;
 
-    private List<PostCommentDTO> replies;
+    private String targetName;
+
+    private List<FileDTO> files;
 
     private Set<Long> deleteFileIds;
+
+    private List<PostCommentDTO> replies;
 
     public void setContent(String content) {
         this.content = CommonUtils.strip(content);

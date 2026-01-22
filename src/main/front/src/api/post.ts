@@ -53,6 +53,12 @@ export const getPosts = async (
   return data;
 };
 
+export const postDelete = async (postId: number) => {
+  const { data } = await api.delete(`/api/post/${postId}`);
+
+  return data;
+};
+
 export const togglePostLike = async ({
   postId,
   isLiked,
@@ -66,6 +72,10 @@ export const togglePostLike = async ({
   });
 
   return res;
+};
+
+export const updateViewCount = async (postId: number) => {
+  return await api.post(`/api/post-view-count-update/${postId}`);
 };
 
 export const postCommentSave = async ({

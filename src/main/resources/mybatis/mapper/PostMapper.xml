@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.project.groupware.repository.mapper.PostMapper">
+    <select id="getComments" resultType="com.project.groupware.dto.PostCommentDTO">
+        WITH RECURSIVE COMMENT_TREE AS (
+            SELECT
+                COMMENT_ID,
+                POST_ID,
+                PARENT_ID,
+                EMP_ID,
+                TARGET_EMP_ID,
+                CONTENT,
+                LIKE_COUNT,
+                CREATED_DATE,
+                COMMENT_ID AS ROOT_ID
+            FROM
+                TBL_POST_COMMENT
+            WHERE
+                PARENT_ID IS NULL
+                AND POST_ID = #{postId}
+                AND DEL_YN = 'N'
+            UNION ALL
+            SELECT
+                c.COMMENT_ID,
+                c.POST_ID,
+                c.PARENT_ID,
+                c.EMP_ID,
+                c.TARGET_EMP_ID,
+                c.CONTENT,
+                c.LIKE_COUNT,
+                c.CREATED_DATE,
+                ct.ROOT_ID
+            FROM
+                TBL_POST_COMMENT c
+            JOIN
+                COMMENT_TREE ct
+                    ON ct.COMMENT_ID = c.PARENT_ID
+            WHERE
+                c.DEL_YN = 'N'
+        )
+        SELECT
+            ct.COMMENT_ID AS commentId,
+            ct.POST_ID AS postId,
+            ct.PARENT_ID AS parentId,
+            e.EMP_ID AS empId,
+            e.EMP_NAME AS empName,
+            e2.EMP_ID AS targetEmpId,
+            e2.EMP_NAME AS targetEmpName,
+            ct.CONTENT AS content,
+            ct.LIKE_COUNT AS likeCount,
+            DATE_FORMAT(ct.CREATED_DATE, "%y-%m-%d %H:%i:%s") AS createdDateFormat,
+            ct.ROOT_ID AS rootId
+        FROM
+            COMMENT_TREE ct
+        JOIN
+            TBL_EMPLOYEE e
+                ON e.EMP_ID = ct.EMP_ID
+        LEFT JOIN
+            TBL_EMPLOYEE e2
+                ON e2.EMP_ID = ct.TARGET_EMP_ID
+        JOIN
+            TBL_POSITION p
+                ON p.POS_ID = e.POS_ID
+        LEFT JOIN
+            TBL_FILE f
+                ON f.FILE_ID = e.PROFILE_ID
+        ORDER BY
+            ct.ROOT_ID,
+            ct.COMMENT_ID
+    </select>
+</mapper>

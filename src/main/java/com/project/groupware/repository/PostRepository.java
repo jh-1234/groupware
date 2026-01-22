@@ -20,4 +20,8 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
     @Modifying
     @Query("update Post p set p.likeCount = p.likeCount - 1 where p.postId = :postId and p.isDeleted = false")
     void decrementLikeCount(@Param("postId") Long postId);
+
+    @Modifying
+    @Query("update Post p set p.viewCount = p.viewCount + 1 where p.postId = :postId and p.isDeleted = false")
+    void incrementViewCount(@Param("postId") Long postId);
 }

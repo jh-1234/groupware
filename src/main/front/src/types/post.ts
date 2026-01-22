@@ -13,6 +13,7 @@ export type Post = {
   likeCount?: number;
   viewCount?: number;
   isUpdated?: boolean;
+  isLiked?: boolean;
   createdDateFormat?: string;
   deleteFileIds?: number[];
 
@@ -25,6 +26,7 @@ export type Post = {
 
 export type PostComment = {
   commentId?: number;
+  parentId?: number;
   empId?: number;
   empName?: string;
   deptName?: string;
@@ -33,6 +35,8 @@ export type PostComment = {
   likeCount?: number;
   isUpdated?: boolean;
   createdDateFormat?: string;
+  targetEmpId?: number;
+  targetEmpName?: string;
   replies?: PostComment[];
   deleteFileIds?: number[];
 

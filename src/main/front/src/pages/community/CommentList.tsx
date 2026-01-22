@@ -2,7 +2,15 @@ import { useState } from "react";
 import SingleComment from "./SingleComment";
 import type { PostComment } from "@/types/post";
 
-export default function CommentList({ comments }: { comments: PostComment[] }) {
+export default function CommentList({
+  comments,
+  lastAddedId,
+  setLastAddedId,
+}: {
+  comments: PostComment[];
+  lastAddedId: number | null;
+  setLastAddedId: (id: number | null) => void;
+}) {
   const [activeReplyId, setActiveReplyId] = useState<number | null>(null);
 
   return (
@@ -13,6 +21,8 @@ export default function CommentList({ comments }: { comments: PostComment[] }) {
             comment={comment}
             activeReplyId={activeReplyId}
             setActiveReplyId={setActiveReplyId}
+            isNew={comment.commentId === lastAddedId}
+            onSuccess={(newId) => setLastAddedId(newId)}
           />
 
           {comment.replies && comment.replies.length > 0 && (
@@ -24,6 +34,8 @@ export default function CommentList({ comments }: { comments: PostComment[] }) {
                   isReply={true}
                   activeReplyId={activeReplyId}
                   setActiveReplyId={setActiveReplyId}
+                  isNew={reply.commentId === lastAddedId}
+                  onSuccess={(newId) => setLastAddedId(newId)}
                 />
               ))}
             </div>

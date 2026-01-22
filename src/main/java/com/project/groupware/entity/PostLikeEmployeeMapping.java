@@ -24,6 +24,6 @@ public class PostLikeEmployeeMapping {
     private PostComment comment;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "USER_SEQ", nullable = false)
+    @JoinColumn(name = "EMP_ID", nullable = false)
     private Employee employee;
 }

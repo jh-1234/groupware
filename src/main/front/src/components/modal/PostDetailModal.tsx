@@ -1,11 +1,15 @@
 import { useAuthImages } from "@/hooks/useAuthImages";
-import { usePost } from "@/hooks/usePost";
-import { useState } from "react";
+import { usePost, usePostDelete, useUpdateViewCount } from "@/hooks/usePost";
+import { useEffect, useState } from "react";
 import ImageSlider from "../common/ImageSlider";
 import CommentList from "@/pages/community/CommentList";
 import CommentInput from "@/pages/community/CommentInput";
 import ImageLightBox from "../common/ImageLightBox";
-import { Trash2, X } from "lucide-react";
+import { Pencil, Trash2, X } from "lucide-react";
+import { toast } from "sonner";
+import { useOpenConfirmModal } from "@/store/confirmModal";
+import PostWriteModal from "./PostWriteModal";
+import PostLikeButton from "../common/PostLikeButton";
 
 export default function PostDetailModal({
   isOpen,
@@ -20,9 +24,53 @@ export default function PostDetailModal({
     images: string[];
     index: number;
   } | null>(null);
+  const [lastAddedId, setLastAddedId] = useState<number | null>(null);
   const { data: post } = usePost(postId);
+  const { mutate: postDelete } = usePostDelete();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const filePaths = post?.files?.map((f) => f.fileLoadPath) || [];
   const { blobUrls } = useAuthImages(filePaths);
+
+  const { mutate: updateViewCount } = useUpdateViewCount();
+
+  const openConfirmModal = useOpenConfirmModal();
+
+  const handlePostDelete = () => {
+    openConfirmModal({
+      title: "포스트 삭제",
+      description: "포스트를 삭제하시겠습니까?",
+      onPositive: () => {
+        postDelete(postId, {
+          onSuccess: () => {
+            toast.success("삭제되었습니다.", {
+              icon: <Trash2 size={18} />,
+              position: "top-center",
+              style: {
+                backgroundColor: "white",
+                color: "#ef4444",
+                border: "none",
+              },
+            });
+
+            onClose();
+          },
+          onError: (e) => {
+            toast.error("삭제 중 오류가 발생했습니다.", {
+              position: "top-center",
+            });
+
+            console.error(e);
+          },
+        });
+      },
+    });
+  };
+
+  useEffect(() => {
+    if (isOpen && postId) {
+      updateViewCount(postId);
+    }
+  }, [isOpen, postId]);
 
   if (!isOpen || !postId) return null;
 
@@ -61,9 +109,21 @@ export default function PostDetailModal({
                 </div>
               </div>
             </div>
-            <button className="text-zinc-300 hover:text-red-500">
-              <Trash2 className="h-5 w-5" />
-            </button>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsEditModalOpen(true)}
+                className="rounded-full p-2 text-zinc-300 transition-colors hover:bg-zinc-100 hover:text-blue-600"
+              >
+                <Pencil className="h-5 w-5" />
+              </button>
+              <button
+                className="rounded-full p-2 text-zinc-300 transition-colors hover:bg-zinc-100 hover:text-red-500"
+                onClick={handlePostDelete}
+              >
+                <Trash2 className="h-5 w-5" />
+              </button>
+            </div>
           </section>
 
           <article className="mt-8">
@@ -83,15 +143,34 @@ export default function PostDetailModal({
             </p>
           </article>
 
+          <div className="mt-6 flex items-center gap-4">
+            <PostLikeButton
+              postId={post?.postId!}
+              isLiked={post?.isLiked!}
+              likeCount={post?.likeCount!}
+            />
+
+            <div className="text-xs font-medium text-zinc-400">
+              조회 {post?.viewCount || 0}
+            </div>
+          </div>
+
           <div className="mt-12 border-t pt-8">
             <h3 className="mb-6 text-lg font-black text-zinc-900">
               댓글 {post?.comments?.length || 0}
             </h3>
-            <CommentList comments={post?.comments || []} />
+            <CommentList
+              comments={post?.comments || []}
+              lastAddedId={lastAddedId}
+              setLastAddedId={setLastAddedId}
+            />
           </div>
         </div>
 
-        <CommentInput postId={postId} />
+        <CommentInput
+          postId={postId}
+          onSuccess={(newId) => setLastAddedId(newId)}
+        />
       </div>
 
       {lightbox && (
@@ -99,6 +178,14 @@ export default function PostDetailModal({
           images={lightbox.images}
           initialIndex={lightbox.index}
           onClose={() => setLightbox(null)}
+        />
+      )}
+
+      {isEditModalOpen && (
+        <PostWriteModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          post={post}
         />
       )}
     </div>

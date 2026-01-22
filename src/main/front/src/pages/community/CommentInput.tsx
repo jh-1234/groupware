@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Image as ImageIcon, Send } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
@@ -9,7 +9,7 @@ import ImageUploader from "@/components/common/ImageUploader";
 
 interface CommentInputProps {
   postId: number;
-  onSuccess?: () => void;
+  onSuccess: (newId: number) => void;
   autoFocus?: boolean;
 }
 
@@ -21,7 +21,6 @@ export default function CommentInput({
   const [content, setContent] = useState("");
   const [images, setImages] = useState<ImagePreview[]>([]);
   const uploaderRef = useRef<{ open: () => void }>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
   const { mutate: commentSave, isPending } = usePostCommentSave();
 
   const handleRemoveImage = (index: number) => {
@@ -55,11 +54,11 @@ export default function CommentInput({
     commentSave(
       { param, images: newFiles },
       {
-        onSuccess: () => {
+        onSuccess: (res) => {
           toast.success("댓글이 등록되었습니다.");
           setContent("");
           setImages([]);
-          onSuccess?.();
+          onSuccess(res.data);
         },
         onError: (e) => {
           if (axios.isAxiosError(e)) toast.error(axiosErrorMessageFormat(e));
@@ -67,6 +66,14 @@ export default function CommentInput({
       },
     );
   };
+
+  useEffect(() => {
+    return () => {
+      images.forEach((img) => {
+        if (img.previewUrl) URL.revokeObjectURL(img.previewUrl);
+      });
+    };
+  }, []);
 
   return (
     <div className="flex flex-col">
@@ -81,17 +88,11 @@ export default function CommentInput({
       <section className="flex items-center gap-3 border-t bg-white px-6 py-4">
         <div className="flex h-12 flex-1 items-center gap-3 rounded-2xl bg-zinc-100 px-4 focus-within:ring-2 focus-within:ring-blue-500/20">
           <input
-            ref={inputRef}
             autoFocus={autoFocus}
             className="flex-1 bg-transparent text-sm font-medium outline-none"
             placeholder="댓글을 입력하세요."
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            onKeyDown={(e) =>
-              e.key === "Enter" &&
-              !e.nativeEvent.isComposing &&
-              handleCommentSave()
-            }
           />
           <button
             type="button"

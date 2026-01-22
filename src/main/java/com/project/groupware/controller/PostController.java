@@ -4,6 +4,7 @@ import com.project.groupware.dto.PostCategoryDTO;
 import com.project.groupware.dto.PostCommentDTO;
 import com.project.groupware.dto.PostDTO;
 import com.project.groupware.service.PostService;
+import com.project.groupware.utils.CustomException;
 import com.project.groupware.utils.PageObj;
 import com.project.groupware.valid.groups.common.Save;
 import com.project.groupware.valid.groups.common.Update;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequiredArgsConstructor
@@ -70,7 +72,18 @@ public class PostController {
 
     @PostMapping("/api/post-like-count-update")
     public ResponseEntity<HttpStatus> postLikeCountUpdate(@RequestBody @Validated(Like.class) PostDTO dto) {
+        if (Objects.isNull(dto.getPostId()) && Objects.isNull(dto.getCommentId())) {
+            throw new CustomException("postId or commentId is null");
+        }
+
         postService.postLikeCountUpdate(dto);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/api/post-view-count-update/{postId}")
+    public ResponseEntity<HttpStatus> postViewCountUpdate(@PathVariable("postId") Long postId) {
+        postService.postViewCountUpdate(postId);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -83,14 +96,14 @@ public class PostController {
     }
 
     @PostMapping("/api/post/comment")
-    public ResponseEntity<HttpStatus> commentSave(@Validated(Save.class) @RequestPart("data") PostCommentDTO dto, @RequestPart(name = "images", required = false) List<MultipartFile> images) {
-        postService.commentSave(dto, images);
+    public ResponseEntity<Long> commentSave(@RequestPart("data") PostCommentDTO dto, @RequestPart(name = "images", required = false) List<MultipartFile> images) {
+        Long commentId = postService.commentSave(dto, images);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok(commentId);
     }
 
     @PatchMapping("/api/post/comment")
-    public ResponseEntity<HttpStatus> commentUpdate(@Validated(Update.class) @RequestPart("data") PostCommentDTO dto, @RequestPart(name = "images", required = false) List<MultipartFile> images) {
+    public ResponseEntity<HttpStatus> commentUpdate(@RequestPart("data") PostCommentDTO dto, @RequestPart(name = "images", required = false) List<MultipartFile> images) {
         postService.commentUpdate(dto, images);
 
         return new ResponseEntity<>(HttpStatus.OK);

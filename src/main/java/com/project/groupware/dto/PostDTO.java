@@ -56,6 +56,8 @@ public class PostDTO {
     @NotNull(groups = {Like.class})
     private Boolean isLiked;
 
+    private Long commentId;
+
     private List<PostCommentDTO> comments;
 
     private List<FileDTO> files;

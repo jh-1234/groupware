@@ -3,24 +3,42 @@ import ImageSlider from "@/components/common/ImageSlider";
 import { useAuthImages } from "@/hooks/useAuthImages";
 import ReplyInput from "./ReplyInput";
 import type { PostComment } from "@/types/post";
+import { useEffect, useRef } from "react";
 
 export default function SingleComment({
   comment,
   activeReplyId,
   setActiveReplyId,
   isReply = false,
+  isNew,
+  onSuccess,
 }: {
   comment: PostComment;
   activeReplyId: number | null;
   setActiveReplyId: (id: number | null) => void;
   isReply?: boolean;
+  isNew: boolean;
+  onSuccess: (newId: number) => void;
 }) {
+  const commentRef = useRef<HTMLDivElement>(null);
   const filePaths = comment?.files?.map((f) => f.fileLoadPath) || [];
   const { blobUrls } = useAuthImages(filePaths);
   const isSelected = activeReplyId === comment.commentId;
 
+  useEffect(() => {
+    if (isNew && commentRef.current) {
+      commentRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [isNew]);
+
   return (
-    <div className="group flex gap-4">
+    <div
+      ref={commentRef}
+      className={`group flex gap-4 transition-colors duration-700 ${isNew ? "rounded-xl bg-blue-50/50" : ""}`}
+    >
       <div
         className={`flex h-11 w-11 shrink-0 items-center justify-center font-bold shadow-sm ${isReply ? "rounded-xl bg-blue-50 text-blue-400" : "rounded-2xl bg-zinc-100 text-zinc-400"}`}
       >
@@ -38,9 +56,9 @@ export default function SingleComment({
         </div>
 
         <p className="mt-1 text-sm leading-relaxed text-zinc-600">
-          {comment.empName && (
+          {comment.parentId && (
             <span className="mr-1.5 font-bold text-blue-600 underline">
-              @{comment.empName}
+              @{comment.targetEmpName}
             </span>
           )}
           {comment.content}
@@ -71,8 +89,9 @@ export default function SingleComment({
             parentId={comment.commentId!}
             targetName={comment.empName!}
             onCancel={() => setActiveReplyId(null)}
-            onSuccess={() => {
+            onSuccess={(newId: number) => {
               setActiveReplyId(null);
+              onSuccess(newId);
             }}
           />
         )}

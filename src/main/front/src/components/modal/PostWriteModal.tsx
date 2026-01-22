@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import type { Post } from "@/types/post";
 import type { ImagePreview } from "../common/ImageUploader";
 import ImageUploader from "../common/ImageUploader";
+import { useAuthImages } from "@/hooks/useAuthImages";
 
 interface PostWriteModalProps {
   isOpen: boolean;
@@ -30,24 +31,29 @@ export default function PostWriteModal({
   );
   const [images, setImages] = useState<ImagePreview[]>([]);
 
-  const { data: categories } = usePostCategories();
+  const { data: categoryData } = usePostCategories();
   const { mutate: postSave, isPending } = usePostSave();
   const [deleteFileIds, setDeleteFileIds] = useState<number[]>([]);
+  const filePaths = post?.files?.map((f) => f.fileLoadPath) || [];
+  const { blobUrls } = useAuthImages(filePaths);
+  const categories = categoryData?.filter((category) => category.cateId !== 1);
 
   useEffect(() => {
     if (!isOpen) return;
 
-    if (isEditMode && post) {
+    if (isEditMode && post && blobUrls.length > 0) {
       setTitle(post.title || "");
       setContent(post.content || "");
       setSelectedCateId(post.cateId);
+
       setImages(
-        post.files?.map((f) => ({
+        post.files?.map((f, index) => ({
           file: null,
-          previewUrl: f.fileLoadPath,
+          previewUrl: blobUrls[index],
           fileId: f.fileId,
         })) || [],
       );
+
       setDeleteFileIds([]);
     } else {
       setTitle("");
@@ -59,15 +65,17 @@ export default function PostWriteModal({
         setSelectedCateId(categories[0].cateId);
       }
     }
-  }, [isOpen, isEditMode, post, categories]);
+  }, [isOpen, isEditMode, post, categories, blobUrls]);
 
   useEffect(() => {
-    if (!isOpen) {
+    return () => {
       images.forEach((img) => {
-        if (!img.fileId) URL.revokeObjectURL(img.previewUrl);
+        if (!img.fileId && img.previewUrl.startsWith("blob:")) {
+          URL.revokeObjectURL(img.previewUrl);
+        }
       });
-    }
-  }, [isOpen]);
+    };
+  }, []);
 
   const removeImage = (index: number) => {
     const target = images[index];

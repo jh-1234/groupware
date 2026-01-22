@@ -12,6 +12,7 @@ import com.project.groupware.repository.PostCategoryRepository;
 import com.project.groupware.repository.PostCommentRepository;
 import com.project.groupware.repository.PostLikeEmployeeMappingRepository;
 import com.project.groupware.repository.PostRepository;
+import com.project.groupware.repository.mapper.PostMapper;
 import com.project.groupware.utils.CustomException;
 import com.project.groupware.utils.PageObj;
 import com.project.groupware.utils.Session;
@@ -22,10 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,6 +32,8 @@ import java.util.stream.Collectors;
 public class PostService {
 
     private final PostRepository postRepository;
+
+    private final PostMapper postMapper;
 
     private final PostCategoryRepository postCategoryRepository;
 
@@ -58,11 +58,18 @@ public class PostService {
 
     public PostDTO getPost(Long postId) {
         PostDTO post = postRepository.getPost(postId);
-        List<PostCommentDTO> comments = postRepository.getComments(postId);
-        List<FileDTO> files = fileService.getFiles(FileConstants.Module.POST, postId);
+        List<FileDTO> postFiles = fileService.getFiles(FileConstants.Module.POST, postId);
+        post.setFiles(postFiles);
 
-        post.setComments(comments);
-        post.setFiles(files);
+        List<PostCommentDTO> comments = postMapper.getComments(postId);
+        Set<Long> commentIds = comments.stream().map(PostCommentDTO::getCommentId).collect(Collectors.toSet());
+        Map<Long, List<FileDTO>> commentFiles = fileService.getAllFiles(FileConstants.Module.POST_COMMENT, commentIds);
+        comments.forEach(comment -> comment.setFiles(commentFiles.get(comment.getCommentId())));
+
+        Map<Long, List<PostCommentDTO>> repliesMap = comments.stream().filter(comment -> Objects.nonNull(comment.getParentId())).collect(Collectors.groupingBy(PostCommentDTO::getRootId));
+        List<PostCommentDTO> result = comments.stream().filter(comment -> Objects.isNull(comment.getParentId())).peek(comment -> comment.setReplies(repliesMap.get(comment.getCommentId()))).toList();
+
+        post.setComments(result);
 
         return post;
     }
@@ -88,6 +95,7 @@ public class PostService {
             throw new CustomException("Post 작성자 본인이 아닙니다.");
         }
 
+        post.setTitle(dto.getTitle());
         post.setContent(dto.getContent());
 
         fileService.remove(dto.getDeleteFileIds());
@@ -112,27 +120,47 @@ public class PostService {
     public void postLikeCountUpdate(PostDTO dto) {
         Post post = findByPostId(dto.getPostId()).orElseThrow();
 
-        PostLikeEmployeeMapping mapping = new PostLikeEmployeeMapping();
-        mapping.setPost(post);
-        mapping.setEmployee(employeeService.getActiveEmployee(Session.getSession().empId()).orElseThrow());
-
         if (dto.getIsLiked()) {
+            PostLikeEmployeeMapping mapping = postLikeEmployeeMappingRepository.findByPost_PostIdAndEmployee_EmpId(dto.getPostId(), Session.getSession().empId()).orElseThrow();
             postLikeEmployeeMappingRepository.delete(mapping);
             postRepository.decrementLikeCount(post.getPostId());
         } else {
+            PostLikeEmployeeMapping mapping = new PostLikeEmployeeMapping();
+            mapping.setPost(post);
+            mapping.setEmployee(employeeService.getActiveEmployee(Session.getSession().empId()).orElseThrow());
+
             postLikeEmployeeMappingRepository.save(mapping);
             postRepository.incrementLikeCount(post.getPostId());
         }
     }
 
-    public void commentSave(PostCommentDTO dto, List<MultipartFile> images) {
-        PostComment comment = new PostComment();
-        comment.setPost(findByPostId(dto.getPostId()).orElseThrow());
-        comment.setEmployee(employeeService.getActiveEmployee(Session.getSession().empId()).orElseThrow());
-        comment.setContent(dto.getContent());
+    public void postViewCountUpdate(Long postId) {
+        postRepository.incrementViewCount(postId);
+    }
 
-        postCommentRepository.save(comment);
+    public Long commentSave(PostCommentDTO dto, List<MultipartFile> images) {
+        PostComment comment = new PostComment();
+
+        if (Objects.nonNull(dto.getParentId())) {
+            PostComment replyTarget = findByCommentId(dto.getParentId()).orElseThrow();
+            comment.setParent(replyTarget);
+            comment.setTarget(replyTarget.getEmployee());
+            comment.setPost(replyTarget.getPost());
+            comment.setEmployee(employeeService.getActiveEmployee(Session.getSession().empId()).orElseThrow());
+            comment.setContent(dto.getContent());
+
+            postCommentRepository.save(comment);
+        } else {
+            comment.setPost(findByPostId(dto.getPostId()).orElseThrow());
+            comment.setEmployee(employeeService.getActiveEmployee(Session.getSession().empId()).orElseThrow());
+            comment.setContent(dto.getContent());
+
+            postCommentRepository.save(comment);
+        }
+
         fileService.save(images, FileConstants.Module.POST_COMMENT, comment.getCommentId());
+
+        return comment.getCommentId();
     }
 
     public void commentUpdate(PostCommentDTO dto, List<MultipartFile> images) {

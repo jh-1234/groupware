@@ -1,7 +1,6 @@
 package com.project.groupware.repository.impl;
 
 import com.project.groupware.constants.PostConstants;
-import com.project.groupware.dto.PostCommentDTO;
 import com.project.groupware.dto.PostDTO;
 import com.project.groupware.repository.custom.PostRepositoryCustom;
 import com.querydsl.core.BooleanBuilder;
@@ -23,7 +22,7 @@ import static com.project.groupware.entity.QFile.file;
 import static com.project.groupware.entity.QPosition.position;
 import static com.project.groupware.entity.QPost.post;
 import static com.project.groupware.entity.QPostCategory.postCategory;
-import static com.project.groupware.entity.QPostComment.postComment;
+import static com.project.groupware.entity.QPostLikeEmployeeMapping.postLikeEmployeeMapping;
 
 
 @Component
@@ -49,7 +48,8 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                         post.viewCount,
                         post.isUpdated,
                         file.fileLoadPath.as("profileUrl"),
-                        Expressions.stringTemplate("DATE_FORMAT({0}, {1})", post.createdDate, "%y-%m-%d %H:%i:%s").as("createdDateFormat")
+                        Expressions.stringTemplate("DATE_FORMAT({0}, {1})", post.createdDate, "%y-%m-%d %H:%i:%s").as("createdDateFormat"),
+                        postLikeEmployeeMapping.id.isNotNull().as("isLiked")
                 ))
                 .from(post)
                 .join(post.category, postCategory)
@@ -57,6 +57,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .join(employee.department, department)
                 .join(employee.position, position)
                 .leftJoin(employee.profile, file)
+                .leftJoin(postLikeEmployeeMapping).on(postLikeEmployeeMapping.post.eq(post))
                 .where(
                         post.postId.eq(postId),
                         post.isDeleted.eq(false)
@@ -103,35 +104,5 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .where(builder);
 
         return PageableExecutionUtils.getPage(posts, pageable, countQuery::fetchOne);
-    }
-
-    @Override
-    public List<PostCommentDTO> getComments(Long postId) {
-        return queryFactory
-                .select(Projections.bean(PostCommentDTO.class,
-                        postComment.commentId,
-                        postComment.post.postId,
-                        postComment.parent.commentId.as("parentId"),
-                        employee.empId,
-                        employee.empName,
-                        position.posName,
-                        file.fileLoadPath.as("profileUrl"),
-                        postComment.content,
-                        postComment.likeCount,
-                        Expressions.stringTemplate("DATE_FORMAT({0}, {1})", postComment.createdDate, "%y-%m-%d %H:%i:%s").as("createdDateFormat")
-                ))
-                .from(postComment)
-                .join(postComment.employee, employee)
-                .join(employee.position, position)
-                .leftJoin(employee.profile, file)
-                .where(
-                        postComment.post.postId.eq(postId),
-                        postComment.isDeleted.eq(false)
-                )
-                .orderBy(
-                        postComment.parent.commentId.coalesce(postComment.commentId).asc(),
-                        postComment.commentId.asc()
-                )
-                .fetch();
     }
 }
