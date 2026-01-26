@@ -9,4 +9,6 @@ import java.util.List;
 public interface PostMapper {
 
     List<PostCommentDTO> getComments(PostCommentDTO dto);
+
+    void deleteComment(Long commentId);
 }

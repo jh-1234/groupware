@@ -1,10 +1,14 @@
-import { Clock } from "lucide-react";
-import ImageSlider from "@/components/common/ImageSlider";
-import { useAuthImages } from "@/hooks/useAuthImages";
-import ReplyInput from "./ReplyInput";
-import type { PostComment } from "@/types/post";
-import { useEffect, useRef } from "react";
 import CommentLikeButton from "@/components/community/CommentLikeButton";
+import ReplyInput from "./ReplyInput";
+import ImageSlider from "@/components/common/ImageSlider";
+import type { PostComment } from "@/types/post";
+import { useEffect, useRef, useState } from "react";
+import { usePostCommentDelete } from "@/hooks/usePost";
+import { useAuthImages } from "@/hooks/useAuthImages";
+import { useSession } from "@/store/authStore";
+import { useOpenConfirmModal } from "@/store/confirmModal";
+import { toast } from "sonner";
+import { Clock, Trash2 } from "lucide-react";
 
 export default function SingleComment({
   comment,
@@ -21,10 +25,16 @@ export default function SingleComment({
   isNew: boolean;
   onSuccess: (newId: number) => void;
 }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const { mutate: postCommentDelete } = usePostCommentDelete();
   const commentRef = useRef<HTMLDivElement>(null);
   const filePaths = comment?.files?.map((f) => f.fileLoadPath) || [];
   const { blobUrls } = useAuthImages(filePaths);
   const isSelected = activeReplyId === comment.commentId;
+
+  const session = useSession();
+  const isMine = comment.empId === session?.empId;
+  const openConfirmModal = useOpenConfirmModal();
 
   useEffect(() => {
     if (isNew && commentRef.current) {
@@ -34,6 +44,32 @@ export default function SingleComment({
       });
     }
   }, [isNew]);
+
+  const handleDelete = () => {
+    openConfirmModal({
+      title: "댓글 삭제",
+      description: "댓글을 삭제하시겠습니까?",
+      onPositive: () => {
+        postCommentDelete(comment.commentId!, {
+          onSuccess: () => {
+            toast.success("삭제되었습니다.", {
+              icon: <Trash2 size={18} />,
+              position: "top-center",
+              style: {
+                backgroundColor: "white",
+                color: "#ef4444",
+                border: "none",
+              },
+            });
+          },
+          onError: (e) => {
+            toast.error("삭제 중 오류가 발생했습니다.");
+            console.error(e);
+          },
+        });
+      },
+    });
+  };
 
   return (
     <div
@@ -46,29 +82,66 @@ export default function SingleComment({
         {comment.empName?.slice(0, 1)}
       </div>
 
-      <div className="flex-1">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-black text-zinc-900">
-            {comment.empName} {comment.posName}
-          </span>
-          <span className="flex items-center gap-1 text-[10px] font-bold text-zinc-400">
-            <Clock className="h-3 w-3" /> {comment.createdDateFormat}
-          </span>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-black text-zinc-900">
+              {comment.empName} {comment.posName}
+            </span>
+            <span className="flex items-center gap-1 text-[10px] font-bold text-zinc-400">
+              <Clock className="h-3 w-3" /> {comment.createdDateFormat}
+            </span>
+          </div>
+
+          {isMine && !isEditing && (
+            <div className="ml-4 flex shrink-0 gap-2">
+              <button
+                onClick={() => setIsEditing(true)}
+                className="text-[10px] font-bold text-zinc-400 transition-colors hover:text-blue-500"
+              >
+                수정
+              </button>
+              <button
+                onClick={handleDelete}
+                className="text-[10px] font-bold text-zinc-400 transition-colors hover:text-red-500"
+              >
+                삭제
+              </button>
+            </div>
+          )}
         </div>
 
-        <p className="mt-1 text-sm leading-relaxed text-zinc-600">
-          {comment.parentId && (
-            <span className="mr-1.5 font-bold text-blue-600 underline">
-              @{comment.targetEmpName}
-            </span>
-          )}
-          {comment.content}
-        </p>
-
-        {blobUrls.length > 0 && (
-          <div className="mt-2 max-w-xs">
-            <ImageSlider type="comment" images={blobUrls} />
+        {isEditing ? (
+          <div className="mt-2">
+            <ReplyInput
+              mode="edit"
+              commentId={comment.commentId!}
+              parentId={comment.parentId!}
+              initialValue={comment.content}
+              targetName={comment.empName!}
+              onCancel={() => setIsEditing(false)}
+              onSuccess={(newId: number) => {
+                onSuccess(newId);
+                setIsEditing(false);
+              }}
+            />
           </div>
+        ) : (
+          <>
+            <p className="wrap-break-words mt-1 text-sm leading-relaxed text-zinc-600">
+              {comment.parentId && (
+                <span className="mr-1.5 font-bold text-blue-600 underline">
+                  @{comment.targetEmpName}
+                </span>
+              )}
+              {comment.content}
+            </p>
+            {blobUrls.length > 0 && (
+              <div className="mt-2 max-w-xs">
+                <ImageSlider type="comment" images={blobUrls} />
+              </div>
+            )}
+          </>
         )}
 
         <div className="mt-3 flex gap-4 text-[11px] font-bold text-zinc-400">

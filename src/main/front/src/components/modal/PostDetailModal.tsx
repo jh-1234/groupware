@@ -155,7 +155,7 @@ export default function PostDetailModal({
 
           <div className="mt-12 border-t pt-8">
             <h3 className="mb-6 text-lg font-black text-zinc-900">
-              댓글 {post?.comments?.length || 0}
+              댓글 {post?.commentCount || 0}
             </h3>
             <CommentList
               comments={post?.comments || []}

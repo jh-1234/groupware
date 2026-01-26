@@ -60,6 +60,8 @@ public class PostDTO {
 
     private List<PostCommentDTO> comments;
 
+    private Integer commentCount;
+
     private List<FileDTO> files;
 
     private Set<Long> deleteFileIds;

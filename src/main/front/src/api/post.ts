@@ -106,6 +106,12 @@ export const postCommentSave = async ({
   }
 };
 
+export const postCommentDelete = async (commentId: number) => {
+  const { data } = await api.delete(`/api/post/comment/${commentId}`);
+
+  return data;
+};
+
 export const toggleCommentLike = async ({
   commentId,
   isLiked,

@@ -1,24 +1,30 @@
 import type { ImagePreview } from "@/components/common/ImageUploader";
 import ImageUploader from "@/components/common/ImageUploader";
 import { usePostCommentSave } from "@/hooks/usePost";
-import { MessageSquare, Image as ImageIcon } from "lucide-react";
+import { MessageSquare, Image as ImageIcon, Pencil } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 interface ReplyInputProps {
   parentId: number;
+  commentId?: number;
   targetName: string;
+  initialValue?: string;
+  mode?: "reply" | "edit";
   onCancel: () => void;
   onSuccess: (newId: number) => void;
 }
 
 export default function ReplyInput({
   parentId,
+  commentId,
   targetName,
+  initialValue = "",
+  mode = "reply",
   onCancel,
   onSuccess,
 }: ReplyInputProps) {
-  const [content, setContent] = useState("");
+  const [content, setContent] = useState(initialValue);
   const [images, setImages] = useState<ImagePreview[]>([]);
   const uploaderRef = useRef<{ open: () => void }>(null);
 
@@ -43,7 +49,8 @@ export default function ReplyInput({
     }
 
     const param = {
-      parentId,
+      commentId: mode === "edit" ? commentId : undefined,
+      parentId: mode === "reply" ? parentId : undefined,
       content: content.trim(),
       deleteFileIds: [],
     };
@@ -56,8 +63,10 @@ export default function ReplyInput({
       { param, images: newFiles },
       {
         onSuccess: (res) => {
-          toast.success("답글이 등록되었습니다.");
-          setContent("");
+          toast.success(
+            mode === "edit" ? "수정되었습니다." : "등록되었습니다.",
+          );
+          if (mode === "reply") setContent("");
           setImages([]);
           onSuccess(res.data);
         },
@@ -76,17 +85,27 @@ export default function ReplyInput({
   return (
     <div className="animate-in fade-in slide-in-from-top-2 mt-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 shadow-inner">
       <div className="mb-2 flex items-center gap-1.5 text-[11px] font-bold text-blue-600">
-        <MessageSquare className="h-3 w-3" />
-        <span>@{targetName}님에게 답글 작성 중</span>
+        {mode === "edit" ? (
+          <>
+            <Pencil className="h-3 w-3" />
+            <span>댓글 수정 중</span>
+          </>
+        ) : (
+          <>
+            <MessageSquare className="h-3 w-3" />
+            <span>@{targetName}님에게 답글 작성 중</span>
+          </>
+        )}
       </div>
 
       <textarea
         className="h-20 w-full resize-none bg-transparent text-sm outline-none placeholder:text-zinc-400"
-        placeholder="사진과 함께 답변을 남겨주세요."
+        placeholder="내용을 입력해주세요."
         autoFocus
         value={content}
         onChange={(e) => setContent(e.target.value)}
       />
+
       <ImageUploader
         ref={uploaderRef}
         images={images}
@@ -119,7 +138,11 @@ export default function ReplyInput({
             onClick={handleReplySubmit}
             className="rounded-lg bg-zinc-900 px-4 py-1.5 text-xs font-bold text-white active:scale-95 disabled:bg-zinc-300"
           >
-            {isPending ? "등록 중..." : "답글 등록"}
+            {isPending
+              ? "처리 중..."
+              : mode === "edit"
+                ? "수정 완료"
+                : "답글 등록"}
           </button>
         </div>
       </div>

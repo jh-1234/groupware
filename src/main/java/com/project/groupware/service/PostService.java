@@ -74,6 +74,7 @@ public class PostService {
         List<PostCommentDTO> result = comments.stream().filter(comment -> Objects.isNull(comment.getParentId())).peek(comment -> comment.setReplies(repliesMap.get(comment.getCommentId()))).toList();
 
         post.setComments(result);
+        post.setCommentCount(comments.size());
 
         return post;
     }
@@ -188,6 +189,10 @@ public class PostService {
         }
 
         comment.setIsDeleted(true);
+
+        if (Objects.isNull(comment.getParent())) {
+            postMapper.deleteComment(commentId);
+        }
     }
 
     public Optional<PostComment> findByCommentId(Long commentId) {

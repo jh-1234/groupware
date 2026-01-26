@@ -2,6 +2,7 @@ import {
   getPost,
   getPostCategories,
   getPosts,
+  postCommentDelete,
   postCommentSave,
   postDelete,
   postSave,
@@ -132,6 +133,17 @@ export const usePostCommentSave = () => {
 
   return useMutation({
     mutationFn: postCommentSave,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.post.all });
+    },
+  });
+};
+
+export const usePostCommentDelete = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: postCommentDelete,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.post.all });
     },

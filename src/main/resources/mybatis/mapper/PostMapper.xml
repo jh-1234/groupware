@@ -3,7 +3,7 @@
 
 <mapper namespace="com.project.groupware.repository.mapper.PostMapper">
     <select id="getComments" parameterType="com.project.groupware.dto.PostCommentDTO" resultType="com.project.groupware.dto.PostCommentDTO">
-        WITH RECURSIVE COMMENT_TREE AS (
+        WITH RECURSIVE CommentTree AS (
             SELECT
                 COMMENT_ID,
                 POST_ID,
@@ -13,6 +13,7 @@
                 CONTENT,
                 LIKE_COUNT,
                 CREATED_DATE,
+                DEL_YN,
                 COMMENT_ID AS ROOT_ID
             FROM
                 TBL_POST_COMMENT
@@ -30,14 +31,13 @@
                 c.CONTENT,
                 c.LIKE_COUNT,
                 c.CREATED_DATE,
+                c.DEL_YN,
                 ct.ROOT_ID
             FROM
                 TBL_POST_COMMENT c
             JOIN
-                COMMENT_TREE ct
+                CommentTree ct
                     ON ct.COMMENT_ID = c.PARENT_ID
-            WHERE
-                c.DEL_YN = 'N'
         )
         SELECT
             ct.COMMENT_ID AS commentId,
@@ -53,7 +53,7 @@
             ct.ROOT_ID AS rootId,
             plem.LIKE_ID IS NOT NULL AS isLiked
         FROM
-            COMMENT_TREE ct
+            CommentTree ct
         JOIN
             TBL_EMPLOYEE e
                 ON e.EMP_ID = ct.EMP_ID
@@ -70,8 +70,35 @@
             TBL_POST_LIKE_EMPLOYEE_MAPPING plem
                 ON plem.COMMENT_ID = ct.COMMENT_ID
                 AND plem.EMP_ID = #{empId}
+        WHERE
+            ct.DEL_YN = 'N'
         ORDER BY
             ct.ROOT_ID,
             ct.COMMENT_ID
     </select>
+
+    <delete id="deleteComment" parameterType="java.lang.Long">
+        WITH RECURSIVE CommentDelete AS (
+            SELECT
+                COMMENT_ID
+            FROM
+                TBL_POST_COMMENT
+            WHERE
+                COMMENT_ID = #{commentId}
+            UNION ALL
+            SELECT
+                pc.COMMENT_ID
+            FROM
+                TBL_POST_COMMENT pc
+            JOIN
+                CommentDelete cd
+                    ON cd.COMMENT_ID = pc.PARENT_ID
+        )
+        UPDATE
+            TBL_POST_COMMENT
+        SET
+            DEL_YN = 'Y'
+        WHERE
+            COMMENT_ID IN (SELECT COMMENT_ID FROM CommentDelete)
+    </delete>
 </mapper>

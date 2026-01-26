@@ -3,14 +3,14 @@ import { combine, createJSONStorage, persist } from "zustand/middleware";
 import { jwtDecode } from "jwt-decode";
 
 interface Session {
-  sub: number;
+  sub?: number;
   empId: number;
   name: string;
   profileUrl: string;
 }
 
 const init: {
-  accessToken: string | null;
+  accessToken: string | undefined | null;
   isLogin: boolean;
   session: Session | null;
 } = { accessToken: null, isLogin: false, session: null };
@@ -27,7 +27,6 @@ const useAuthStore = create(
               accessToken: token,
               isLogin: true,
               session: {
-                sub: data.sub,
                 empId: Number(data.sub),
                 name: data.name,
                 profileUrl: data.profileUrl,
