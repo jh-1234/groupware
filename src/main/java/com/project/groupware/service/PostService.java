@@ -48,7 +48,7 @@ public class PostService {
     public void postSave(PostDTO dto, List<MultipartFile> images) {
         Post post = new Post();
         post.setCategory(postCategoryRepository.findByCateIdAndIsDeletedFalse(dto.getCateId()).orElseThrow());
-        post.setAuthor(employeeService.getActiveEmployee(Session.getSession().empId()).orElseThrow());
+        post.setAuthor(employeeService.getActiveEmployee(Session.getSession().getEmpId()).orElseThrow());
         post.setTitle(dto.getTitle());
         post.setContent(dto.getContent());
 
@@ -63,7 +63,7 @@ public class PostService {
 
         PostCommentDTO param = new PostCommentDTO();
         param.setPostId(postId);
-        param.setEmpId(Session.getSession().empId());
+        param.setEmpId(Session.getSession().getEmpId());
 
         List<PostCommentDTO> comments = postMapper.getComments(param);
         Set<Long> commentIds = comments.stream().map(PostCommentDTO::getCommentId).collect(Collectors.toSet());
@@ -96,7 +96,7 @@ public class PostService {
     public void postUpdate(PostDTO dto, List<MultipartFile> images) {
         Post post = findByPostId(dto.getPostId()).orElseThrow();
 
-        if (!Objects.equals(Session.getSession().empId(), post.getAuthor().getEmpId())) {
+        if (!Objects.equals(Session.getSession().getEmpId(), post.getAuthor().getEmpId())) {
             throw new CustomException("Post 작성자 본인이 아닙니다.");
         }
 
@@ -110,7 +110,7 @@ public class PostService {
     public void postDelete(Long postId) {
         Post post = findByPostId(postId).orElseThrow();
 
-        if (!Objects.equals(Session.getSession().empId(), post.getAuthor().getEmpId())) {
+        if (!Objects.equals(Session.getSession().getEmpId(), post.getAuthor().getEmpId())) {
             throw new CustomException("Post 작성자 본인이 아닙니다.");
         }
 
@@ -126,13 +126,13 @@ public class PostService {
         Post post = findByPostId(dto.getPostId()).orElseThrow();
 
         if (dto.getIsLiked()) {
-            PostLikeEmployeeMapping mapping = postLikeEmployeeMappingRepository.findByPost_PostIdAndEmployee_EmpId(dto.getPostId(), Session.getSession().empId()).orElseThrow();
+            PostLikeEmployeeMapping mapping = postLikeEmployeeMappingRepository.findByPost_PostIdAndEmployee_EmpId(dto.getPostId(), Session.getSession().getEmpId()).orElseThrow();
             postLikeEmployeeMappingRepository.delete(mapping);
             postRepository.decrementLikeCount(post.getPostId());
         } else {
             PostLikeEmployeeMapping mapping = new PostLikeEmployeeMapping();
             mapping.setPost(post);
-            mapping.setEmployee(employeeService.getActiveEmployee(Session.getSession().empId()).orElseThrow());
+            mapping.setEmployee(employeeService.getActiveEmployee(Session.getSession().getEmpId()).orElseThrow());
 
             postLikeEmployeeMappingRepository.save(mapping);
             postRepository.incrementLikeCount(post.getPostId());
@@ -151,13 +151,13 @@ public class PostService {
             comment.setParent(replyTarget);
             comment.setTarget(replyTarget.getEmployee());
             comment.setPost(replyTarget.getPost());
-            comment.setEmployee(employeeService.getActiveEmployee(Session.getSession().empId()).orElseThrow());
+            comment.setEmployee(employeeService.getActiveEmployee(Session.getSession().getEmpId()).orElseThrow());
             comment.setContent(dto.getContent());
 
             postCommentRepository.save(comment);
         } else {
             comment.setPost(findByPostId(dto.getPostId()).orElseThrow());
-            comment.setEmployee(employeeService.getActiveEmployee(Session.getSession().empId()).orElseThrow());
+            comment.setEmployee(employeeService.getActiveEmployee(Session.getSession().getEmpId()).orElseThrow());
             comment.setContent(dto.getContent());
 
             postCommentRepository.save(comment);
@@ -171,7 +171,7 @@ public class PostService {
     public void commentUpdate(PostCommentDTO dto, List<MultipartFile> images) {
         PostComment comment = findByCommentId(dto.getCommentId()).orElseThrow();
 
-        if (!Objects.equals(Session.getSession().empId(), comment.getEmployee().getEmpId())) {
+        if (!Objects.equals(Session.getSession().getEmpId(), comment.getEmployee().getEmpId())) {
             throw new CustomException("댓글 작성자 본인이 아닙니다.");
         }
 
@@ -184,7 +184,7 @@ public class PostService {
     public void commentDelete(Long commentId) {
         PostComment comment = findByCommentId(commentId).orElseThrow();
 
-        if (!Objects.equals(Session.getSession().empId(), comment.getEmployee().getEmpId())) {
+        if (!Objects.equals(Session.getSession().getEmpId(), comment.getEmployee().getEmpId())) {
             throw new CustomException("댓글 작성자 본인이 아닙니다.");
         }
 
@@ -203,13 +203,13 @@ public class PostService {
         PostComment comment = findByCommentId(dto.getCommentId()).orElseThrow();
 
         if (dto.getIsLiked()) {
-            PostLikeEmployeeMapping mapping = postLikeEmployeeMappingRepository.findByComment_CommentIdAndEmployee_EmpId(dto.getCommentId(), Session.getSession().empId()).orElseThrow();
+            PostLikeEmployeeMapping mapping = postLikeEmployeeMappingRepository.findByComment_CommentIdAndEmployee_EmpId(dto.getCommentId(), Session.getSession().getEmpId()).orElseThrow();
             postLikeEmployeeMappingRepository.delete(mapping);
             postCommentRepository.decrementLikeCount(comment.getCommentId());
         } else {
             PostLikeEmployeeMapping mapping = new PostLikeEmployeeMapping();
             mapping.setComment(comment);
-            mapping.setEmployee(employeeService.getActiveEmployee(Session.getSession().empId()).orElseThrow());
+            mapping.setEmployee(employeeService.getActiveEmployee(Session.getSession().getEmpId()).orElseThrow());
 
             postLikeEmployeeMappingRepository.save(mapping);
             postCommentRepository.incrementLikeCount(comment.getCommentId());

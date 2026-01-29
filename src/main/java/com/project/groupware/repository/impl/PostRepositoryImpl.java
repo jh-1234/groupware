@@ -58,7 +58,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .join(employee.department, department)
                 .join(employee.position, position)
                 .leftJoin(employee.profile, file)
-                .leftJoin(postLikeEmployeeMapping).on(postLikeEmployeeMapping.post.eq(post), postLikeEmployeeMapping.employee.empId.eq(Session.getSession().empId()))
+                .leftJoin(postLikeEmployeeMapping).on(postLikeEmployeeMapping.post.eq(post), postLikeEmployeeMapping.employee.empId.eq(Session.getSession().getEmpId()))
                 .where(
                         post.postId.eq(postId),
                         post.isDeleted.eq(false)

@@ -19,7 +19,7 @@ public class CustomAuditingEntityListener {
             for (Field field : clazz.getDeclaredFields()) {
                 if (field.isAnnotationPresent(CreatedById.class)) {
                     field.setAccessible(true);
-                    field.set(entity, session.empId());
+                    field.set(entity, session.getEmpId());
                 }
             }
 

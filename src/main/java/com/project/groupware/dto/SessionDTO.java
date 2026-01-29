@@ -1,31 +1,53 @@
 package com.project.groupware.dto;
 
 import com.project.groupware.entity.Employee;
-import lombok.Builder;
+import com.project.groupware.entity.File;
+import lombok.Getter;
+import lombok.Setter;
 
-@Builder(toBuilder = true)
-public record SessionDTO(Long empId,
-                         String username,
-                         String empName,
-                         Integer deptId,
-                         Long deptAuthValue,
-                         Integer posId,
-                         Long posAuthValue,
-                         Integer roleId,
-                         Long roleAuthValue,
-                         String refreshToken) {
+import java.util.Optional;
+
+@Getter
+@Setter
+public class SessionDTO {
+
+    private Long empId;
+
+    private String username;
+
+    private String empName;
+
+    private Integer deptId;
+
+    private Long deptAuthValue;
+
+    private Integer posId;
+
+    private Long posAuthValue;
+
+    private Integer roleId;
+
+    private Long roleAuthValue;
+
+    private String profileUrl;
+
+    private String refreshToken;
+
+    private Boolean isRememberMe;
 
     public static SessionDTO from(Employee employee) {
-        return SessionDTO.builder()
-                .empId(employee.getEmpId())
-                .username(employee.getUsername())
-                .empName(employee.getEmpName())
-                .deptId(employee.getDepartment().getDeptId())
-                .deptAuthValue(employee.getDepartment().getDeptAuthValue())
-                .posId(employee.getPosition().getPosId())
-                .posAuthValue(employee.getPosition().getPosAuthValue())
-                .roleId(employee.getRole().getRoleId())
-                .roleAuthValue(employee.getRole().getRoleAuthValue())
-                .build();
+        SessionDTO session = new SessionDTO();
+        session.setEmpId(employee.getEmpId());
+        session.setUsername(employee.getUsername());
+        session.setEmpName(employee.getEmpName());
+        session.setDeptId(employee.getDepartment().getDeptId());
+        session.setDeptAuthValue(employee.getDepartment().getDeptAuthValue());
+        session.setPosId(employee.getPosition().getPosId());
+        session.setPosAuthValue(employee.getPosition().getPosAuthValue());
+        session.setRoleId(employee.getRole().getRoleId());
+        session.setRoleAuthValue(employee.getRole().getRoleAuthValue());
+        session.setProfileUrl(Optional.ofNullable(employee.getProfile()).map(File::getFileLoadPath).orElse(null));
+
+        return session;
     }
 }

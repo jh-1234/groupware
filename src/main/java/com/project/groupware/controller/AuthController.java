@@ -32,7 +32,7 @@ public class AuthController {
     public ResponseEntity<String> login(@RequestBody LoginDTO dto, HttpServletResponse response) {
         JwtTokenDTO token = authService.login(dto);
 
-        long maxAge = dto.getIsRememberMe() ? refreshTokenExpiration.toMillis() : -1;
+        long maxAge = token.getIsRememberMe() ? refreshTokenExpiration.toSeconds() : -1;
 
         ResponseCookie cookie = ResponseCookie.from("refreshToken", token.getRefreshToken())
                 .httpOnly(true)
@@ -48,15 +48,37 @@ public class AuthController {
     }
 
     @PostMapping("/api/reissue")
-    public ResponseEntity<String> reissue(@CookieValue("refreshToken") String refreshToken) {
-        String newAccessToken = authService.reissue(refreshToken);
+    public ResponseEntity<String> reissue(@CookieValue("refreshToken") String refreshToken, HttpServletResponse response) {
+        JwtTokenDTO token = authService.reissue(refreshToken);
 
-        return ResponseEntity.ok(newAccessToken);
+        long maxAge = token.getIsRememberMe() ? refreshTokenExpiration.toSeconds() : -1;
+
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", token.getRefreshToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(maxAge)
+                .sameSite("Lax")
+                .build();
+
+        response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        return ResponseEntity.ok(token.getAccessToken());
     }
 
     @PostMapping("/api/logout")
-    public ResponseEntity<HttpStatus> logout(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<HttpStatus> logout(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletResponse response) {
         authService.logout(userDetails);
+
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Lax")
+                .build();
+
+        response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

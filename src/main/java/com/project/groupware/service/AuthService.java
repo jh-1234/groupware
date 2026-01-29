@@ -9,6 +9,7 @@ import com.project.groupware.security.CustomUserDetails;
 import com.project.groupware.security.jwt.JwtProvider;
 import com.project.groupware.utils.CustomException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,11 +18,15 @@ import org.springframework.util.StringUtils;
 import tools.jackson.databind.ObjectMapper;
 
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class AuthService {
+
+    @Value("${jwt.refresh-token.expiration}")
+    private Duration refreshTokenExpiration;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -42,22 +47,24 @@ public class AuthService {
             throw new CustomException("일치하는 회원 정보가 없습니다.");
         }
 
-        String accessToken = jwtProvider.getAccessToken(employee);
-        String refreshToken = jwtProvider.getRefreshToken(employee);
+        SessionDTO session = SessionDTO.from(employee);
+        session.setIsRememberMe(dto.getIsRememberMe());
 
-        SessionDTO session = SessionDTO.from(employee)
-                .toBuilder()
-                .refreshToken(refreshToken)
-                .build();
+        System.out.println("isRememberMe 1: " + session.getIsRememberMe());
+
+        String accessToken = jwtProvider.getAccessToken(session);
+        String refreshToken = jwtProvider.getRefreshToken(session);
+
+        session.setRefreshToken(refreshToken);
 
         String sessionJson = objectMapper.writeValueAsString(session);
 
-        redisTemplate.opsForValue().set("SESSION:" + session.empId(), sessionJson, Duration.ofDays(7));
+        redisTemplate.opsForValue().set("SESSION:" + session.getEmpId(), sessionJson, refreshTokenExpiration.toDays(), TimeUnit.DAYS);
 
-        return new JwtTokenDTO(accessToken, refreshToken);
+        return new JwtTokenDTO(accessToken, refreshToken, session.getIsRememberMe());
     }
 
-    public String reissue(String refreshToken) {
+    public JwtTokenDTO reissue(String refreshToken) {
         if (!jwtProvider.validateToken(refreshToken)) {
             throw new CustomException("로그인 정보가 유효하지 않습니다. 다시 로그인 해주세요.");
         }
@@ -72,7 +79,7 @@ public class AuthService {
 
         SessionDTO session = objectMapper.readValue(sessionJson, SessionDTO.class);
 
-        if (!session.refreshToken().equals(refreshToken)) {
+        if (!session.getRefreshToken().equals(refreshToken)) {
             // 토큰이 서로 다르다면 토큰 탈취 의심 -> 기존 토큰 삭제
             redisTemplate.delete("SESSION:" + empId);
 
@@ -80,21 +87,26 @@ public class AuthService {
         }
 
         Employee employee = employeeService.getActiveEmployee(empId).orElseThrow();
-        String newAccessToken = jwtProvider.getAccessToken(employee);
-        String newRefreshToken = jwtProvider.getRefreshToken(employee);
+
+
+        SessionDTO newSession = SessionDTO.from(employee);
+        newSession.setIsRememberMe(session.getIsRememberMe());
+
+        System.out.println("isRememberMe 2: " + newSession.getIsRememberMe());
+
+        String newAccessToken = jwtProvider.getAccessToken(newSession);
+        String newRefreshToken = jwtProvider.getRefreshToken(newSession);
 
         // 갑자기 로그아웃 되지 않도록 refresh token 도 같이 연장
-        session.toBuilder()
-                .refreshToken(newRefreshToken)
-                .build();
+        newSession.setRefreshToken(newRefreshToken);
 
-        redisTemplate.opsForValue().set("SESSION:" + session.empId(), objectMapper.writeValueAsString(session), Duration.ofDays(7));
+        redisTemplate.opsForValue().set("SESSION:" + newSession.getEmpId(), objectMapper.writeValueAsString(newSession), refreshTokenExpiration.toDays(), TimeUnit.DAYS);
 
-        return newAccessToken;
+        return new JwtTokenDTO(newAccessToken, newRefreshToken, newSession.getIsRememberMe());
     }
 
     public void logout(CustomUserDetails userDetails) {
-        Long empId = userDetails.session().empId();
+        Long empId = userDetails.session().getEmpId();
 
         redisTemplate.delete("SESSION:" + empId);
     }

@@ -1,7 +1,6 @@
 package com.project.groupware.security.jwt;
 
-import com.project.groupware.entity.Employee;
-import com.project.groupware.entity.File;
+import com.project.groupware.dto.SessionDTO;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -12,7 +11,6 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Date;
-import java.util.Optional;
 
 @Component
 public class JwtProvider {
@@ -33,26 +31,27 @@ public class JwtProvider {
         this.refreshTokenExpiration = refreshTokenExpiration.toMillis();
     }
 
-    public String getAccessToken(Employee employee) {
+    public String getAccessToken(SessionDTO session) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + accessTokenExpiration);
 
         return Jwts.builder()
-                .subject(String.valueOf(employee.getEmpId()))
-                .claim("name", employee.getEmpName())
-                .claim("profileUrl", Optional.ofNullable(employee.getProfile()).map(File::getFileLoadPath).orElse(null))
+                .subject(String.valueOf(session.getEmpId()))
+                .claim("name", session.getEmpName())
+                .claim("profileUrl", session.getProfileUrl())
                 .issuedAt(now)
                 .expiration(validity)
                 .signWith(this.secretKey, Jwts.SIG.HS512)
                 .compact();
     }
 
-    public String getRefreshToken(Employee employee) {
+    public String getRefreshToken(SessionDTO session) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + refreshTokenExpiration);
 
         return Jwts.builder()
-                .subject(String.valueOf(employee.getEmpId()))
+                .subject(String.valueOf(session.getEmpId()))
+                .claim("isRememberMe", session.getIsRememberMe())
                 .issuedAt(now)
                 .expiration(validity)
                 .signWith(this.secretKey, Jwts.SIG.HS512)
