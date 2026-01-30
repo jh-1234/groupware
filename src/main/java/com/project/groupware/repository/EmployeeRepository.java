@@ -11,4 +11,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>, Emplo
 
     @EntityGraph(attributePaths = {"department", "position", "role", "state", "profile"})
     Optional<Employee> findByEmpIdAndState_StateIdAndIsLockedFalseAndIsDeletedFalse(Long empId, Integer stateId);
+
+    Optional<Employee> findByEmpId(Long empId);
 }

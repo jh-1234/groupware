@@ -11,9 +11,13 @@ import java.time.LocalDate;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class EmployeeDTO {
 
+    private Long no;
+
     private Long empId;
 
     private String username;
+
+    private String password;
 
     private String empName;
 

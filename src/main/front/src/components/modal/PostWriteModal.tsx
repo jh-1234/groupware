@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { X, Send } from "lucide-react";
-import { usePostCategories, usePostSave } from "@/hooks/usePost";
+import { usePostCategories, useSavePost } from "@/hooks/usePost";
 import { useOpenConfirmModal } from "@/store/confirmModal";
 import { axiosErrorMessageFormat } from "@/utils/errorUtils";
 import axios from "axios";
@@ -32,7 +32,7 @@ export default function PostWriteModal({
   const [images, setImages] = useState<ImagePreview[]>([]);
 
   const { data: categoryData } = usePostCategories();
-  const { mutate: postSave, isPending } = usePostSave();
+  const { mutate: savePost, isPending } = useSavePost();
   const [deleteFileIds, setDeleteFileIds] = useState<number[]>([]);
   const filePaths = post?.files?.map((f) => f.fileLoadPath) || [];
   const { blobUrls } = useAuthImages(filePaths);
@@ -125,7 +125,7 @@ export default function PostWriteModal({
       .filter((image) => image.file)
       .map((image) => image.file as File);
 
-    postSave(
+    savePost(
       { param, images: newFiles },
       {
         onSuccess: () => {

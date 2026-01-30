@@ -50,8 +50,6 @@ public class AuthService {
         SessionDTO session = SessionDTO.from(employee);
         session.setIsRememberMe(dto.getIsRememberMe());
 
-        System.out.println("isRememberMe 1: " + session.getIsRememberMe());
-
         String accessToken = jwtProvider.getAccessToken(session);
         String refreshToken = jwtProvider.getRefreshToken(session);
 
@@ -91,8 +89,6 @@ public class AuthService {
 
         SessionDTO newSession = SessionDTO.from(employee);
         newSession.setIsRememberMe(session.getIsRememberMe());
-
-        System.out.println("isRememberMe 2: " + newSession.getIsRememberMe());
 
         String newAccessToken = jwtProvider.getAccessToken(newSession);
         String newRefreshToken = jwtProvider.getRefreshToken(newSession);

@@ -29,8 +29,8 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping(value = "/api/post", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<HttpStatus> postSave(@Validated(Save.class) @RequestPart("data") PostDTO dto, @RequestPart(name = "images", required = false) List<MultipartFile> images) {
-        postService.postSave(dto, images);
+    public ResponseEntity<HttpStatus> savePost(@Validated(Save.class) @RequestPart("data") PostDTO dto, @RequestPart(name = "images", required = false) List<MultipartFile> images) {
+        postService.savePost(dto, images);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -57,15 +57,15 @@ public class PostController {
     }
 
     @PatchMapping(value = "/api/post", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<HttpStatus> postUpdate(@Validated(Update.class) @RequestPart("data") PostDTO dto, @RequestPart(name = "images", required = false) List<MultipartFile> images) {
-        postService.postUpdate(dto, images);
+    public ResponseEntity<HttpStatus> updatePost(@Validated(Update.class) @RequestPart("data") PostDTO dto, @RequestPart(name = "images", required = false) List<MultipartFile> images) {
+        postService.updatePost(dto, images);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @DeleteMapping("/api/post/{postId}")
-    public ResponseEntity<HttpStatus> postDelete(@PathVariable("postId") Long postId) {
-        postService.postDelete(postId);
+    public ResponseEntity<HttpStatus> deletePost(@PathVariable("postId") Long postId) {
+        postService.deletePost(postId);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -89,22 +89,22 @@ public class PostController {
     }
 
     @PostMapping("/api/post/comment")
-    public ResponseEntity<Long> commentSave(@RequestPart("data") PostCommentDTO dto, @RequestPart(name = "images", required = false) List<MultipartFile> images) {
-        Long commentId = postService.commentSave(dto, images);
+    public ResponseEntity<Long> saveComment(@RequestPart("data") PostCommentDTO dto, @RequestPart(name = "images", required = false) List<MultipartFile> images) {
+        Long commentId = postService.saveComment(dto, images);
 
         return ResponseEntity.ok(commentId);
     }
 
     @PatchMapping("/api/post/comment")
-    public ResponseEntity<HttpStatus> commentUpdate(@RequestPart("data") PostCommentDTO dto, @RequestPart(name = "images", required = false) List<MultipartFile> images) {
-        postService.commentUpdate(dto, images);
+    public ResponseEntity<HttpStatus> updateComment(@RequestPart("data") PostCommentDTO dto, @RequestPart(name = "images", required = false) List<MultipartFile> images) {
+        postService.updateComment(dto, images);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @DeleteMapping("/api/post/comment/{commentId}")
-    public ResponseEntity<HttpStatus> commentDelete(@PathVariable("commentId") Long commentId) {
-        postService.commentDelete(commentId);
+    public ResponseEntity<HttpStatus> deleteComment(@PathVariable("commentId") Long commentId) {
+        postService.deleteComment(commentId);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

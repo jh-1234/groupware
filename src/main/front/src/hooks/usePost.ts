@@ -1,11 +1,11 @@
 import {
+  deletePost,
+  deletePostComment,
   getPost,
   getPostCategories,
   getPosts,
-  postCommentDelete,
-  postCommentSave,
-  postDelete,
-  postSave,
+  savePost,
+  savePostComment,
   toggleCommentLike,
   togglePostLike,
   updateViewCount,
@@ -14,11 +14,11 @@ import { QUERY_KEYS } from "@/lib/constants";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-export const usePostSave = () => {
+export const useSavePost = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: postSave,
+    mutationFn: savePost,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.post.all });
     },
@@ -41,11 +41,11 @@ export const usePosts = (cateId: number, page: number) => {
   });
 };
 
-export const usePostDelete = () => {
+export const useDeletePost = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: postDelete,
+    mutationFn: deletePost,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.post.all });
     },
@@ -128,22 +128,22 @@ export const useUpdateViewCount = () => {
   });
 };
 
-export const usePostCommentSave = () => {
+export const useSavePostComment = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: postCommentSave,
+    mutationFn: savePostComment,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.post.all });
     },
   });
 };
 
-export const usePostCommentDelete = () => {
+export const useDeletePostComment = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: postCommentDelete,
+    mutationFn: deletePostComment,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.post.all });
     },

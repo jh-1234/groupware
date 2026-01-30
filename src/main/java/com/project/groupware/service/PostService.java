@@ -45,7 +45,7 @@ public class PostService {
 
     private final FileService fileService;
 
-    public void postSave(PostDTO dto, List<MultipartFile> images) {
+    public void savePost(PostDTO dto, List<MultipartFile> images) {
         Post post = new Post();
         post.setCategory(postCategoryRepository.findByCateIdAndIsDeletedFalse(dto.getCateId()).orElseThrow());
         post.setAuthor(employeeService.getActiveEmployee(Session.getSession().getEmpId()).orElseThrow());
@@ -93,7 +93,7 @@ public class PostService {
         return postRepository.findByPostIdAndIsDeletedIsFalse(postId);
     }
 
-    public void postUpdate(PostDTO dto, List<MultipartFile> images) {
+    public void updatePost(PostDTO dto, List<MultipartFile> images) {
         Post post = findByPostId(dto.getPostId()).orElseThrow();
 
         if (!Objects.equals(Session.getSession().getEmpId(), post.getAuthor().getEmpId())) {
@@ -107,7 +107,7 @@ public class PostService {
         fileService.save(images, FileConstants.Module.POST, post.getPostId());
     }
 
-    public void postDelete(Long postId) {
+    public void deletePost(Long postId) {
         Post post = findByPostId(postId).orElseThrow();
 
         if (!Objects.equals(Session.getSession().getEmpId(), post.getAuthor().getEmpId())) {
@@ -143,7 +143,7 @@ public class PostService {
         postRepository.incrementViewCount(postId);
     }
 
-    public Long commentSave(PostCommentDTO dto, List<MultipartFile> images) {
+    public Long saveComment(PostCommentDTO dto, List<MultipartFile> images) {
         PostComment comment = new PostComment();
 
         if (Objects.nonNull(dto.getParentId())) {
@@ -168,7 +168,7 @@ public class PostService {
         return comment.getCommentId();
     }
 
-    public void commentUpdate(PostCommentDTO dto, List<MultipartFile> images) {
+    public void updateComment(PostCommentDTO dto, List<MultipartFile> images) {
         PostComment comment = findByCommentId(dto.getCommentId()).orElseThrow();
 
         if (!Objects.equals(Session.getSession().getEmpId(), comment.getEmployee().getEmpId())) {
@@ -181,7 +181,7 @@ public class PostService {
         fileService.save(images, FileConstants.Module.POST_COMMENT, comment.getCommentId());
     }
 
-    public void commentDelete(Long commentId) {
+    public void deleteComment(Long commentId) {
         PostComment comment = findByCommentId(commentId).orElseThrow();
 
         if (!Objects.equals(Session.getSession().getEmpId(), comment.getEmployee().getEmpId())) {

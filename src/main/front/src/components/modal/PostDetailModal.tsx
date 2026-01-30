@@ -1,5 +1,5 @@
 import { useAuthImages } from "@/hooks/useAuthImages";
-import { usePost, usePostDelete } from "@/hooks/usePost";
+import { useDeletePost, usePost } from "@/hooks/usePost";
 import { useState } from "react";
 import ImageSlider from "../common/ImageSlider";
 import CommentList from "@/pages/community/CommentList";
@@ -27,7 +27,7 @@ export default function PostDetailModal({
   } | null>(null);
   const [lastAddedId, setLastAddedId] = useState<number | null>(null);
   const { data: post } = usePost(postId);
-  const { mutate: postDelete } = usePostDelete();
+  const { mutate: deletePost } = useDeletePost();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const filePaths = post?.files?.map((f) => f.fileLoadPath) || [];
   const { blobUrls } = useAuthImages(filePaths);
@@ -42,7 +42,7 @@ export default function PostDetailModal({
       title: "포스트 삭제",
       description: "포스트를 삭제하시겠습니까?",
       onPositive: () => {
-        postDelete(postId, {
+        deletePost(postId, {
           onSuccess: () => {
             toast.success("삭제되었습니다.", {
               icon: <Trash2 size={18} />,

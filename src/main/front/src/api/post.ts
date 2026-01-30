@@ -2,7 +2,7 @@ import type { Post, PostCategory, PostComment } from "@/types/post";
 import api from "./instance/axiosInstance";
 import type { Page } from "@/types/page";
 
-export const postSave = async ({
+export const savePost = async ({
   param,
   images,
 }: {
@@ -53,7 +53,7 @@ export const getPosts = async (
   return data;
 };
 
-export const postDelete = async (postId: number) => {
+export const deletePost = async (postId: number) => {
   const { data } = await api.delete(`/api/post/${postId}`);
 
   return data;
@@ -78,7 +78,7 @@ export const updateViewCount = async (postId: number) => {
   return await api.post(`/api/post-view-count-update/${postId}`);
 };
 
-export const postCommentSave = async ({
+export const savePostComment = async ({
   param,
   images,
 }: {
@@ -106,7 +106,7 @@ export const postCommentSave = async ({
   }
 };
 
-export const postCommentDelete = async (commentId: number) => {
+export const deletePostComment = async (commentId: number) => {
   const { data } = await api.delete(`/api/post/comment/${commentId}`);
 
   return data;

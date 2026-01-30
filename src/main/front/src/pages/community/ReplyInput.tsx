@@ -1,6 +1,6 @@
 import type { ImagePreview } from "@/components/common/ImageUploader";
 import ImageUploader from "@/components/common/ImageUploader";
-import { usePostCommentSave } from "@/hooks/usePost";
+import { useSavePostComment } from "@/hooks/usePost";
 import { MessageSquare, Image as ImageIcon, Pencil } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -28,7 +28,7 @@ export default function ReplyInput({
   const [images, setImages] = useState<ImagePreview[]>([]);
   const uploaderRef = useRef<{ open: () => void }>(null);
 
-  const { mutate: commentSave, isPending } = usePostCommentSave();
+  const { mutate: saveComment, isPending } = useSavePostComment();
 
   const handleRemoveImage = (index: number) => {
     setImages((prev) => {
@@ -59,7 +59,7 @@ export default function ReplyInput({
       .filter((img) => img.file)
       .map((img) => img.file as File);
 
-    commentSave(
+    saveComment(
       { param, images: newFiles },
       {
         onSuccess: (res) => {

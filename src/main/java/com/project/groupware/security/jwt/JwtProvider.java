@@ -39,6 +39,7 @@ public class JwtProvider {
                 .subject(String.valueOf(session.getEmpId()))
                 .claim("name", session.getEmpName())
                 .claim("profileUrl", session.getProfileUrl())
+                .claim("roleId", session.getRoleId())
                 .issuedAt(now)
                 .expiration(validity)
                 .signWith(this.secretKey, Jwts.SIG.HS512)

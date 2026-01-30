@@ -3,7 +3,7 @@ import ReplyInput from "./ReplyInput";
 import ImageSlider from "@/components/common/ImageSlider";
 import type { PostComment } from "@/types/post";
 import { useEffect, useRef, useState } from "react";
-import { usePostCommentDelete } from "@/hooks/usePost";
+import { useDeletePostComment } from "@/hooks/usePost";
 import { useAuthImages } from "@/hooks/useAuthImages";
 import { useSession } from "@/store/authStore";
 import { useOpenConfirmModal } from "@/store/confirmModal";
@@ -26,7 +26,7 @@ export default function SingleComment({
   onSuccess: (newId: number) => void;
 }) {
   const [isEditing, setIsEditing] = useState(false);
-  const { mutate: postCommentDelete } = usePostCommentDelete();
+  const { mutate: deletePostComment } = useDeletePostComment();
   const commentRef = useRef<HTMLDivElement>(null);
   const filePaths = comment?.files?.map((f) => f.fileLoadPath) || [];
   const { blobUrls } = useAuthImages(filePaths);
@@ -50,7 +50,7 @@ export default function SingleComment({
       title: "댓글 삭제",
       description: "댓글을 삭제하시겠습니까?",
       onPositive: () => {
-        postCommentDelete(comment.commentId!, {
+        deletePostComment(comment.commentId!, {
           onSuccess: () => {
             toast.success("삭제되었습니다.", {
               icon: <Trash2 size={18} />,

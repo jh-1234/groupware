@@ -7,6 +7,7 @@ interface Session {
   empId: number;
   name: string;
   profileUrl: string;
+  roleId: number;
 }
 
 const init: {
@@ -30,6 +31,7 @@ const useAuthStore = create(
                 empId: Number(data.sub),
                 name: data.name,
                 profileUrl: data.profileUrl,
+                roleId: data.roleId,
               },
             });
           } catch (e) {

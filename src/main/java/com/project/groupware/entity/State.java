@@ -1,5 +1,6 @@
 package com.project.groupware.entity;
 
+import com.project.groupware.constants.StateKeys;
 import com.project.groupware.converters.BooleanConverter;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -22,8 +23,8 @@ public class State {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer stateId;
 
-    @NotBlank
-    private String stateKey;
+    @Enumerated(EnumType.STRING)
+    private StateKeys stateKey;
 
     @NotBlank
     private String stateName;

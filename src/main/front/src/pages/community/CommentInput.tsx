@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Image as ImageIcon, Send } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
-import { usePostCommentSave } from "@/hooks/usePost";
+import { useSavePostComment } from "@/hooks/usePost";
 import { axiosErrorMessageFormat } from "@/utils/errorUtils";
 import type { ImagePreview } from "@/components/common/ImageUploader";
 import ImageUploader from "@/components/common/ImageUploader";
@@ -21,7 +21,7 @@ export default function CommentInput({
   const [content, setContent] = useState("");
   const [images, setImages] = useState<ImagePreview[]>([]);
   const uploaderRef = useRef<{ open: () => void }>(null);
-  const { mutate: commentSave, isPending } = usePostCommentSave();
+  const { mutate: saveComment, isPending } = useSavePostComment();
 
   const handleRemoveImage = (index: number) => {
     setImages((prev) => {
@@ -51,7 +51,7 @@ export default function CommentInput({
       .filter((img) => img.file)
       .map((img) => img.file as File);
 
-    commentSave(
+    saveComment(
       { param, images: newFiles },
       {
         onSuccess: (res) => {
