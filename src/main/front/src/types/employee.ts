@@ -1,6 +1,6 @@
 export type Employee = {
   no?: number;
-  empId: number;
+  empId?: number;
   username?: string;
   password?: string;
   empName?: string;
@@ -14,13 +14,14 @@ export type Employee = {
   stateName?: string;
   email?: string;
   tel?: string;
+  gender?: string;
   birthday?: string;
   profileUrl?: string;
   hireDate?: string;
   resignDate?: string;
 };
 
-export type EmployeeSearchData = {
+export type EmployeeCommonData = {
   departments: { deptId: number; deptName: string; deptAuthValue: number }[];
   positions: { posId: number; posName: string; posAuthValue: number }[];
   roles: { roleId: number; roleName: string; roleAuthValue: number }[];

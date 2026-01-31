@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { X, Send } from "lucide-react";
 import { usePostCategories, useSavePost } from "@/hooks/usePost";
-import { useOpenConfirmModal } from "@/store/confirmModal";
+import { useOpenConfirmModal } from "@/store/confirmModalStore";
 import { axiosErrorMessageFormat } from "@/utils/errorUtils";
 import axios from "axios";
 import { toast } from "sonner";
 import type { Post } from "@/types/post";
-import type { ImagePreview } from "../common/ImageUploader";
-import ImageUploader from "../common/ImageUploader";
+import type { ImagePreview } from "../../components/common/ImageUploader";
+import ImageUploader from "../../components/common/ImageUploader";
 import { useAuthImages } from "@/hooks/useAuthImages";
 
 interface PostWriteModalProps {

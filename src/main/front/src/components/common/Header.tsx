@@ -3,11 +3,9 @@ import ProfileButton from "../button/ProfileButton";
 import ChatButton from "../button/ChatButton";
 import { useSession } from "@/store/authStore";
 import { ROLE_ADMIN } from "@/lib/constants";
-import { Settings } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import AdminButton from "../button/AdminButton";
 
 export default function Header() {
-  const navigate = useNavigate();
   const session = useSession();
   const isAdmin = session?.roleId === ROLE_ADMIN;
 
@@ -16,16 +14,7 @@ export default function Header() {
       <div className="flex w-full items-center justify-between">
         <LogoButton />
         <div className="flex items-center gap-5">
-          {isAdmin && (
-            <button
-              onClick={() => navigate("/admin")}
-              className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-semibold text-zinc-600 transition-all hover:bg-zinc-100 hover:text-blue-600"
-              title="관리자 페이지"
-            >
-              <Settings className="h-5 w-5" />
-              <span className="hidden md:block">관리자</span>
-            </button>
-          )}
+          {isAdmin && <AdminButton />}
 
           {isAdmin && <div className="h-4 w-px bg-zinc-200" />}
 

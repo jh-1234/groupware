@@ -2,7 +2,7 @@ import { MessageCircle } from "lucide-react";
 
 export default function ChatButton({ unreadCount }: { unreadCount: number }) {
   return (
-    <button className="group relative rounded-full p-2 text-zinc-500 transition-colors hover:bg-zinc-100">
+    <button className="group relative cursor-pointer rounded-full p-2 text-zinc-500 transition-colors hover:bg-zinc-100">
       <MessageCircle className="h-6 w-6 group-hover:text-zinc-700" />
 
       {unreadCount > 0 && (

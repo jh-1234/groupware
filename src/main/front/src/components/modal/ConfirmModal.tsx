@@ -1,4 +1,4 @@
-import { useConfirmModal } from "@/store/confirmModal";
+import { useConfirmModal } from "@/store/confirmModalStore";
 import {
   AlertDialog,
   AlertDialogAction,

@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { useDeletePostComment } from "@/hooks/usePost";
 import { useAuthImages } from "@/hooks/useAuthImages";
 import { useSession } from "@/store/authStore";
-import { useOpenConfirmModal } from "@/store/confirmModal";
+import { useOpenConfirmModal } from "@/store/confirmModalStore";
 import { toast } from "sonner";
 import { Clock, Trash2 } from "lucide-react";
 

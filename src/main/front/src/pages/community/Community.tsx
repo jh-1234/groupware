@@ -1,4 +1,4 @@
-import PostWriteModal from "@/components/modal/PostWriteModal";
+import PostWriteModal from "@/pages/community/PostWriteModal";
 import { usePostCategories } from "@/hooks/usePost";
 import { Search, PenSquare } from "lucide-react";
 import { useEffect, useState } from "react";

@@ -84,7 +84,7 @@ public class AuthService {
             throw new CustomException("유효하지 않은 요청입니다. 다시 로그인 해주세요.");
         }
 
-        Employee employee = employeeService.getActiveEmployee(empId).orElseThrow();
+        Employee employee = employeeService.findByActiveEmployee(empId).orElseThrow();
 
 
         SessionDTO newSession = SessionDTO.from(employee);

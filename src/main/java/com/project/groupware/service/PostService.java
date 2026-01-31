@@ -48,7 +48,7 @@ public class PostService {
     public void savePost(PostDTO dto, List<MultipartFile> images) {
         Post post = new Post();
         post.setCategory(postCategoryRepository.findByCateIdAndIsDeletedFalse(dto.getCateId()).orElseThrow());
-        post.setAuthor(employeeService.getActiveEmployee(Session.getSession().getEmpId()).orElseThrow());
+        post.setAuthor(employeeService.findByActiveEmployee(Session.getSession().getEmpId()).orElseThrow());
         post.setTitle(dto.getTitle());
         post.setContent(dto.getContent());
 
@@ -132,7 +132,7 @@ public class PostService {
         } else {
             PostLikeEmployeeMapping mapping = new PostLikeEmployeeMapping();
             mapping.setPost(post);
-            mapping.setEmployee(employeeService.getActiveEmployee(Session.getSession().getEmpId()).orElseThrow());
+            mapping.setEmployee(employeeService.findByActiveEmployee(Session.getSession().getEmpId()).orElseThrow());
 
             postLikeEmployeeMappingRepository.save(mapping);
             postRepository.incrementLikeCount(post.getPostId());
@@ -151,13 +151,13 @@ public class PostService {
             comment.setParent(replyTarget);
             comment.setTarget(replyTarget.getEmployee());
             comment.setPost(replyTarget.getPost());
-            comment.setEmployee(employeeService.getActiveEmployee(Session.getSession().getEmpId()).orElseThrow());
+            comment.setEmployee(employeeService.findByActiveEmployee(Session.getSession().getEmpId()).orElseThrow());
             comment.setContent(dto.getContent());
 
             postCommentRepository.save(comment);
         } else {
             comment.setPost(findByPostId(dto.getPostId()).orElseThrow());
-            comment.setEmployee(employeeService.getActiveEmployee(Session.getSession().getEmpId()).orElseThrow());
+            comment.setEmployee(employeeService.findByActiveEmployee(Session.getSession().getEmpId()).orElseThrow());
             comment.setContent(dto.getContent());
 
             postCommentRepository.save(comment);
@@ -209,7 +209,7 @@ public class PostService {
         } else {
             PostLikeEmployeeMapping mapping = new PostLikeEmployeeMapping();
             mapping.setComment(comment);
-            mapping.setEmployee(employeeService.getActiveEmployee(Session.getSession().getEmpId()).orElseThrow());
+            mapping.setEmployee(employeeService.findByActiveEmployee(Session.getSession().getEmpId()).orElseThrow());
 
             postLikeEmployeeMappingRepository.save(mapping);
             postCommentRepository.incrementLikeCount(comment.getCommentId());

@@ -1,6 +1,10 @@
 package com.project.groupware.service;
 
 import com.project.groupware.constants.StateKeys;
+import com.project.groupware.dto.DepartmentDTO;
+import com.project.groupware.dto.PositionDTO;
+import com.project.groupware.dto.RoleDTO;
+import com.project.groupware.dto.StateDTO;
 import com.project.groupware.entity.Department;
 import com.project.groupware.entity.Position;
 import com.project.groupware.entity.Role;
@@ -29,35 +33,51 @@ public class CommonService {
 
     private final StateRepository stateRepository;
 
-    public Optional<Department> getDepartment(Integer deptId) {
+    public Optional<Department> findByDepartment(Integer deptId) {
         return departmentRepository.findByDeptIdAndIsDeletedFalse(deptId);
     }
 
-    public List<Department> getDepartments() {
+    public List<Department> findAllByDepartment() {
         return departmentRepository.findAllByIsDeletedFalseOrderBySortOrderAsc();
     }
 
-    public Optional<Position> getPosition(Integer posId) {
+    public Optional<Position> findByPosition(Integer posId) {
         return positionRepository.findByPosIdAndIsDeletedFalse(posId);
     }
 
-    public List<Position> getPositions() {
+    public List<Position> findAllByPosition() {
         return positionRepository.findAllByIsDeletedFalseOrderBySortOrderAsc();
     }
 
-    public Optional<Role> getRole(Integer roleId) {
+    public Optional<Role> findByRole(Integer roleId) {
         return roleRepository.findByRoleIdAndIsDeletedFalse(roleId);
     }
 
-    public List<Role> getRoles() {
+    public List<Role> findAllByRole() {
         return roleRepository.findAllByIsDeletedFalseOrderBySortOrderAsc();
     }
 
-    public Optional<State> getState(Integer stateId) {
+    public Optional<State> findByState(Integer stateId) {
         return stateRepository.findByStateIdAndIsDeletedFalse(stateId);
     }
 
-    public List<State> getStates(StateKeys key) {
+    public List<State> findAllByState(StateKeys key) {
         return stateRepository.findAllByIsDeletedFalseOrderBySortOrderAsc(key);
+    }
+
+    public List<DepartmentDTO> getDepartments() {
+        return findAllByDepartment().stream().map(department -> new DepartmentDTO(department.getDeptId(), department.getDeptName(), department.getDeptAuthValue())).toList();
+    }
+
+    public List<PositionDTO> getPositions() {
+        return findAllByPosition().stream().map(position -> new PositionDTO(position.getPosId(), position.getPosName(), position.getPosAuthValue())).toList();
+    }
+
+    public List<RoleDTO> getRoles() {
+        return findAllByRole().stream().map(role -> new RoleDTO(role.getRoleId(), role.getRoleName(), role.getRoleAuthValue())).toList();
+    }
+
+    public List<StateDTO> getStates(StateKeys key) {
+        return findAllByState(key).stream().map(state -> new StateDTO(state.getStateId(), state.getStateName())).toList();
     }
 }

@@ -5,7 +5,7 @@ import jakarta.persistence.Converter;
 
 import java.util.Objects;
 
-@Converter
+@Converter(autoApply = true)
 public class BooleanConverter implements AttributeConverter<Boolean, String> {
 
     /**

@@ -1,20 +1,20 @@
 import { useEffect, useState } from "react";
-import { Search, Download, Edit2, Trash2, UserPlus } from "lucide-react";
-import {
-  useDeleteEmployee,
-  useEmployees,
-  useEmployeeSearchData,
-} from "@/hooks/useEmployee";
+import { Edit2, Trash2, X } from "lucide-react";
+import { useDeleteEmployee, useEmployees } from "@/hooks/useEmployee";
 import { STATE_EMPLOYED, STATE_RESIGNED } from "@/lib/constants";
 import CustomPagination from "@/components/common/Pagination";
-import SelectBox from "@/components/common/SelectBox";
-import { useOpenConfirmModal } from "@/store/confirmModal";
+import { useOpenConfirmModal } from "@/store/confirmModalStore";
 import { toast } from "sonner";
+import Header from "./Header";
+import { useEmployeeStore } from "@/store/employeeStore";
+import FilterBox from "./FilterBox";
+import EmployeeAddModal from "./EmployeeAddModal";
 
 export default function EmployeeManagement() {
-  const [page, setPage] = useState(0);
-  const [searchWord, setSearchWord] = useState("");
+  const { page, filters, searchWord, setPage } = useEmployeeStore();
   const [debouncedSearchWord, setDebouncedSearchWord] = useState(searchWord);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [seletedEmpId, setSeletedEmpId] = useState<number>();
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -27,33 +27,15 @@ export default function EmployeeManagement() {
     };
   }, [searchWord]);
 
-  const [filters, setFilters] = useState<{
-    deptId: number | null;
-    posId: number | null;
-    roleId: number | null;
-    stateId: number | null;
-  }>({
-    deptId: null,
-    posId: null,
-    roleId: null,
-    stateId: null,
-  });
-
   const { data } = useEmployees(page, filters, debouncedSearchWord);
   const employees = data?.content;
 
-  const { data: searchData } = useEmployeeSearchData();
+  const handleUpdate = (empId: number) => {
+    setSeletedEmpId(empId);
+    setIsModalOpen(true);
+  };
 
   const { mutate: deleteEmployee } = useDeleteEmployee();
-
-  const handleFilterChange = (key: string, value: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      [key]: value === "" ? null : Number(value),
-    }));
-
-    setPage(0);
-  };
 
   const openConfirmModal = useOpenConfirmModal();
 
@@ -88,78 +70,9 @@ export default function EmployeeManagement() {
 
   return (
     <div className="p-8">
-      <div className="mb-8 flex items-end justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-zinc-900">사원 관리</h1>
-          <p className="mt-1 text-sm text-zinc-500">
-            조직 내 모든 사원의 계정 및 정보를 관리합니다.
-          </p>
-        </div>
-        <div className="flex gap-3">
-          <button className="flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-50">
-            <Download className="h-4 w-4" /> 엑셀 다운로드
-          </button>
-          <button className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700">
-            <UserPlus className="h-4 w-4" /> 사원 개별 등록
-          </button>
-        </div>
-      </div>
+      <Header />
 
-      <div className="mb-6 flex flex-wrap items-center gap-3 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
-        <div className="flex flex-wrap items-center gap-3">
-          <SelectBox
-            title="부서"
-            onChange={(e) => handleFilterChange("deptId", e.target.value)}
-            options={
-              searchData?.departments.map((department) => ({
-                id: department.deptId,
-                name: department.deptName,
-              })) ?? []
-            }
-          />
-          <SelectBox
-            title="직위"
-            onChange={(e) => handleFilterChange("posId", e.target.value)}
-            options={
-              searchData?.positions.map((position) => ({
-                id: position.posId,
-                name: position.posName,
-              })) ?? []
-            }
-          />
-          <SelectBox
-            title="권한"
-            onChange={(e) => handleFilterChange("roleId", e.target.value)}
-            options={
-              searchData?.roles.map((role) => ({
-                id: role.roleId,
-                name: role.roleName,
-              })) ?? []
-            }
-          />
-          <SelectBox
-            title="재직 상태"
-            onChange={(e) => handleFilterChange("stateId", e.target.value)}
-            options={
-              searchData?.states.map((state) => ({
-                id: state.stateId,
-                name: state.stateName,
-              })) ?? []
-            }
-          />
-        </div>
-
-        <div className="relative ml-auto max-w-md min-w-72 flex-1">
-          <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-zinc-400" />
-          <input
-            type="text"
-            placeholder="이름, 연락처로 검색..."
-            className="w-full rounded-md border border-zinc-200 py-2 pr-4 pl-10 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-            value={searchWord}
-            onChange={(e) => setSearchWord(e.target.value)}
-          />
-        </div>
-      </div>
+      <FilterBox />
 
       <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white shadow-sm">
         <table className="w-full text-sm">
@@ -217,12 +130,15 @@ export default function EmployeeManagement() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex justify-center gap-1">
-                      <button className="rounded-lg p-2 text-zinc-400 transition-colors hover:bg-blue-50 hover:text-blue-600">
+                      <button
+                        className="rounded-lg p-2 text-zinc-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                        onClick={() => handleUpdate(employee.empId!)}
+                      >
                         <Edit2 className="h-4 w-4" />
                       </button>
                       <button
                         className="rounded-lg p-2 text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-600"
-                        onClick={() => handleDelete(employee.empId)}
+                        onClick={() => handleDelete(employee.empId!)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -250,6 +166,30 @@ export default function EmployeeManagement() {
           page={page}
           onChange={(_, p) => setPage(p - 1)}
         />
+      )}
+
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-2xl rounded-xl bg-white shadow-xl">
+            <div className="flex items-center justify-between border-b border-zinc-100 p-6">
+              <h2 className="text-xl font-bold text-zinc-900">
+                사원 정보 수정
+              </h2>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="text-zinc-400 hover:text-zinc-600"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            <div className="p-6">
+              <EmployeeAddModal
+                empId={seletedEmpId}
+                onClose={() => setIsModalOpen(false)}
+              />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -1,8 +1,6 @@
 package com.project.groupware.entity;
 
 import com.project.groupware.constants.FileConstants;
-import com.project.groupware.converters.BooleanConverter;
-import com.project.groupware.converters.FileModuleTypeConverter;
 import com.project.groupware.entity.auditing.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -50,19 +48,16 @@ public class File extends BaseEntity {
     private String fileLoadPath;
 
     @NotNull
-    @Convert(converter = FileModuleTypeConverter.class)
     private FileConstants.Module moduleType;
 
     @NotNull
     private Long moduleId;
 
     @NotNull
-    @Convert(converter = BooleanConverter.class)
     @Column(name = "DEL_YN")
     private Boolean isDeleted;
 
     @NotNull
-    @Convert(converter = BooleanConverter.class)
     @Column(name = "FILE_DEL_YN")
     private Boolean isFileDeleted;
 }

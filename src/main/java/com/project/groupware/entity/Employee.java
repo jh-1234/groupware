@@ -1,6 +1,6 @@
 package com.project.groupware.entity;
 
-import com.project.groupware.converters.BooleanConverter;
+import com.project.groupware.constants.EmployeeConstants;
 import com.project.groupware.entity.auditing.BaseEntity;
 import com.project.groupware.utils.CommonUtils;
 import jakarta.persistence.*;
@@ -67,6 +67,9 @@ public class Employee extends BaseEntity {
     private String telClean;
 
     @NotNull
+    private EmployeeConstants.Gender gender;
+
+    @NotNull
     private LocalDate birthday;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -79,12 +82,10 @@ public class Employee extends BaseEntity {
     private LocalDate resignDate;
 
     @NotNull
-    @Convert(converter = BooleanConverter.class)
     @Column(name = "LOCK_YN")
     private Boolean isLocked;
 
     @NotNull
-    @Convert(converter = BooleanConverter.class)
     @Column(name = "DEL_YN")
     private Boolean isDeleted;
 }

@@ -1,6 +1,6 @@
 package com.project.groupware.repository.impl;
 
-import com.project.groupware.constants.MemberConstants;
+import com.project.groupware.constants.EmployeeConstants;
 import com.project.groupware.dto.EmployeeDTO;
 import com.project.groupware.dto.SearchDTO;
 import com.project.groupware.entity.Employee;
@@ -40,7 +40,7 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
                 .selectFrom(employee)
                 .where(
                         employee.username.eq(username),
-                        employee.state.stateId.eq(MemberConstants.State.EMPLOYED.getValue()),
+                        employee.state.stateId.eq(EmployeeConstants.State.EMPLOYED.getValue()),
                         employee.isLocked.eq(false),
                         employee.isDeleted.eq(false)
                 )
@@ -116,5 +116,61 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
                 .where(builder);
 
         return PageableExecutionUtils.getPage(employees, pageable, countQuery::fetchOne);
+    }
+
+    @Override
+    public List<EmployeeDTO> getAdminEmployeesExcelData(SearchDTO dto) {
+        BooleanBuilder builder = new BooleanBuilder();
+        builder.and(employee.isDeleted.eq(false));
+
+        if (Objects.nonNull(dto.getDeptId())) {
+            builder.and(department.deptId.eq(dto.getDeptId()));
+        }
+
+        if (Objects.nonNull(dto.getPosId())) {
+            builder.and(position.posId.eq(dto.getPosId()));
+        }
+
+        if (Objects.nonNull(dto.getRoleId())) {
+            builder.and(role.roleId.eq(dto.getRoleId()));
+        }
+
+        if (Objects.nonNull(dto.getStateId())) {
+            builder.and(state.stateId.eq(dto.getStateId()));
+        }
+
+        if (StringUtils.hasText(dto.getSearchWord())) {
+            builder.and(
+                    employee.empName.contains(dto.getSearchWord())
+                            .or(employee.tel.contains(dto.getSearchWord()))
+                            .or(employee.telClean.contains(dto.getSearchWord()))
+            );
+        }
+
+        return queryFactory
+                .select(Projections.bean(EmployeeDTO.class,
+                        Expressions.numberTemplate(Long.class, "ROW_NUMBER() OVER(ORDER BY {0})", employee.empId).as("no"),
+                        employee.empId,
+                        employee.username,
+                        employee.empName,
+                        department.deptName,
+                        position.posName,
+                        role.roleName,
+                        state.stateName,
+                        employee.email,
+                        employee.tel,
+                        employee.birthday,
+                        employee.hireDate,
+                        employee.resignDate
+                ))
+                .from(employee)
+                .join(employee.department, department)
+                .join(employee.position, position)
+                .join(employee.role, role)
+                .join(employee.state, state)
+                .leftJoin(employee.profile, file)
+                .where(builder)
+                .orderBy(employee.empId.asc())
+                .fetch();
     }
 }

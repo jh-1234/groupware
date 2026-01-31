@@ -1,5 +1,5 @@
 import CustomPagination from "@/components/common/Pagination";
-import PostDetailModal from "@/components/modal/PostDetailModal";
+import PostDetailModal from "@/pages/community/PostDetailModal";
 import { usePosts, useUpdateViewCount } from "@/hooks/usePost";
 import { MessageSquare, Eye, ThumbsUp } from "lucide-react";
 import { useEffect, useState } from "react";

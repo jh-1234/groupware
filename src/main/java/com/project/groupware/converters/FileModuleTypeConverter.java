@@ -7,7 +7,7 @@ import jakarta.persistence.Converter;
 import java.util.Arrays;
 import java.util.Objects;
 
-@Converter
+@Converter(autoApply = true)
 public class FileModuleTypeConverter implements AttributeConverter<FileConstants.Module, String> {
 
     /**
@@ -24,6 +24,6 @@ public class FileModuleTypeConverter implements AttributeConverter<FileConstants
     @Override
     public FileConstants.Module convertToEntityAttribute(String string) {
         return Objects.nonNull(string) ? Arrays.stream(FileConstants.Module.values())
-                .filter(v -> v.getValue().equals(string)).findFirst().orElseThrow(IllegalArgumentException::new) : null;
+                .filter(v -> v.getValue().equals(string)).findFirst().orElseThrow() : null;
     }
 }

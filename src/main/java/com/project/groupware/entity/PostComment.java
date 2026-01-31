@@ -1,6 +1,5 @@
 package com.project.groupware.entity;
 
-import com.project.groupware.converters.BooleanConverter;
 import com.project.groupware.entity.auditing.TimeEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -48,12 +47,10 @@ public class PostComment extends TimeEntity {
     private Employee target;
 
     @NotNull
-    @Convert(converter = BooleanConverter.class)
     @Column(name = "UPDATE_YN")
     private Boolean isUpdated;
 
     @NotNull
-    @Convert(converter = BooleanConverter.class)
     @Column(name = "DEL_YN")
     private Boolean isDeleted;
 }

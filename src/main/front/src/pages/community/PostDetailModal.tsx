@@ -1,15 +1,15 @@
 import { useAuthImages } from "@/hooks/useAuthImages";
 import { useDeletePost, usePost } from "@/hooks/usePost";
 import { useState } from "react";
-import ImageSlider from "../common/ImageSlider";
+import ImageSlider from "../../components/common/ImageSlider";
 import CommentList from "@/pages/community/CommentList";
 import CommentInput from "@/pages/community/CommentInput";
-import ImageLightBox from "../common/ImageLightBox";
+import ImageLightBox from "../../components/common/ImageLightBox";
 import { Pencil, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
-import { useOpenConfirmModal } from "@/store/confirmModal";
+import { useOpenConfirmModal } from "@/store/confirmModalStore";
 import PostWriteModal from "./PostWriteModal";
-import PostLikeButton from "../community/PostLikeButton";
+import PostLikeButton from "../../components/community/PostLikeButton";
 import { useSession } from "@/store/authStore";
 
 export default function PostDetailModal({

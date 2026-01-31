@@ -6,6 +6,7 @@ import com.project.groupware.entity.Employee;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface EmployeeRepositoryCustom {
@@ -13,4 +14,6 @@ public interface EmployeeRepositoryCustom {
     Optional<Employee> login(String username);
 
     Page<EmployeeDTO> getAdminEmployees(SearchDTO dto, Pageable pageable);
+
+    List<EmployeeDTO> getAdminEmployeesExcelData(SearchDTO dto);
 }

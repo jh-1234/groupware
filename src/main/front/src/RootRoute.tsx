@@ -7,7 +7,7 @@ import AuthLayout from "./components/layout/AuthLayout";
 import MainLayout from "./components/layout/MainLayout";
 import Community from "./pages/community/Community";
 import AdminLayout from "./components/layout/AdminLayout";
-import EmployeeManagement from "./pages/admin/EmployeeManagement";
+import EmployeeManagement from "./pages/admin/employee/EmployeeManagement";
 
 export default function RootRoute() {
   return (

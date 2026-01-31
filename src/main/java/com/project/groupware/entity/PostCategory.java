@@ -1,6 +1,5 @@
 package com.project.groupware.entity;
 
-import com.project.groupware.converters.BooleanConverter;
 import com.project.groupware.entity.auditing.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -30,7 +29,6 @@ public class PostCategory extends BaseEntity {
     private Integer sortOrder;
 
     @NotNull
-    @Convert(converter = BooleanConverter.class)
     @Column(name = "DEL_YN")
     private Boolean isDeleted;
 }

@@ -1,14 +1,8 @@
-import { Users, Landmark, Award, ShieldCheck, ChevronLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { NavLink, Link } from "react-router-dom";
+import * as Icons from "lucide-react";
 
-const adminMenuItems = [
-  { icon: Users, label: "사원 관리", path: "/admin/employees" },
-  { icon: Landmark, label: "부서 관리", path: "/admin/departments" },
-  { icon: Award, label: "직위 관리", path: "/admin/positions" },
-  { icon: ShieldCheck, label: "권한 관리", path: "/admin/auth" },
-];
-
-export default function AdminSidebar() {
+export default function AdminSidebar({ menus }: { menus: any[] }) {
   return (
     <aside className="flex h-full w-52 flex-col border-r border-zinc-200 bg-white shadow-sm">
       <div className="flex items-center gap-2 border-b border-zinc-100 px-6 py-4">
@@ -17,22 +11,26 @@ export default function AdminSidebar() {
       </div>
 
       <nav className="flex-1 space-y-1 px-3 py-4">
-        {adminMenuItems.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            className={({ isActive }) =>
-              `group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
-                isActive
-                  ? "bg-blue-50 text-blue-600"
-                  : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
-              }`
-            }
-          >
-            <item.icon className="h-5 w-5 shrink-0" />
-            <span>{item.label}</span>
-          </NavLink>
-        ))}
+        {menus.map((menu) => {
+          const IconComponent = (Icons as any)[menu.icon] || Icons.HelpCircle;
+
+          return (
+            <NavLink
+              key={menu.path}
+              to={menu.path}
+              className={({ isActive }) =>
+                `group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
+                  isActive
+                    ? "bg-blue-50 text-blue-600 shadow-sm"
+                    : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
+                }`
+              }
+            >
+              <IconComponent className="h-5 w-5 shrink-0" />
+              <span>{menu.label}</span>
+            </NavLink>
+          );
+        })}
       </nav>
 
       <div className="border-t border-zinc-100 p-3">
